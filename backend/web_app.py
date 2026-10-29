@@ -30,7 +30,7 @@ OUT_ROOT = Path(
 )
 sys.path.insert(0, str(ROOT))
 
-from fastapi import FastAPI, File, Form, UploadFile
+from fastapi import FastAPI, File, Form, Request, UploadFile
 from fastapi.responses import (
     FileResponse,
     HTMLResponse,
@@ -325,12 +325,20 @@ class _OfflinePlanner(MusePlanner):
 
 
 @app.get("/api/tune")
-def tune(intent: str, demo: int = 0, model: str = "muse-spark-1.3"):
+def tune(request: Request, intent: str, demo: int = 0, model: str = "muse-spark-1.3"):
     """SSE Thought Stream: plan -> patch -> gate -> (self-correct) -> done.
 
     demo=1 forces the deterministic offline planner so the 450 Nm Safety Gate
     intercept is reproducible on camera (live Muse often self-moderates).
     """
+    if not demo and _is_rate_limited(request, max_per_min=10, key_name="tune"):
+        return JSONResponse(
+            {
+                "error": "Rate limit exceeded: max 10 calibrations per minute. Please wait."
+            },
+            status_code=429,
+        )
+
     stock = STATE["stock"] or load_flash(STOCK_BIN)
     STATE["stock"] = stock
     planner = _OfflinePlanner() if demo else MusePlanner(model=model)
@@ -438,33 +446,67 @@ def download_report():
     )
 
 
+import time
+from collections import defaultdict
+
+_RATE_LIMITS: dict[str, list[float]] = defaultdict(list)
+
+
+def _is_rate_limited(
+    request: Request, max_per_min: int = 15, key_name: str = ""
+) -> bool:
+    ip = request.client.host if request.client else "local"
+    now = time.time()
+    k = f"{ip}:{key_name}"
+    _RATE_LIMITS[k] = [t for t in _RATE_LIMITS[k] if now - t < 60]
+    if len(_RATE_LIMITS[k]) >= max_per_min:
+        return True
+    _RATE_LIMITS[k].append(now)
+    return False
+
+
+def _ensure_sample_chart() -> Path:
+    candidates = [
+        ASSET_ROOT / "demo_assets" / "output" / "torque_comparison.png",
+        ASSET_ROOT / "torque_comparison.png",
+        ROOT / "demo_assets" / "output" / "torque_comparison.png",
+        OUT / "torque_comparison.png",
+    ]
+    for c in candidates:
+        if c.is_file() and c.stat().st_size > 500:
+            return c
+    chart_out = OUT / "torque_comparison.png"
+    chart_out.parent.mkdir(parents=True, exist_ok=True)
+    stock = STATE["stock"] or load_flash(STOCK_BIN)
+    tuned = STATE["tuned"] or stock
+    from backend.ai_engine.sam_vision import render_torque_comparison
+
+    render_torque_comparison(stock, tuned, CATALOG, chart_out)
+    return chart_out
+
+
 @app.get("/api/sample-dyno")
 def sample_dyno():
-    sample_path = ROOT / "demo_assets" / "output" / "torque_comparison.png"
-    if not sample_path.exists():
-        sample_path = OUT / "torque_comparison.png"
-    if not sample_path.exists():
-        return JSONResponse(
-            {"error": "Sample chart not generated yet"}, status_code=404
-        )
-    return FileResponse(sample_path, media_type="image/png")
+    p = _ensure_sample_chart()
+    return FileResponse(p, media_type="image/png")
 
 
 @app.post("/api/vision-sample")
-def vision_sample():
-    sample_path = ROOT / "demo_assets" / "output" / "torque_comparison.png"
-    if not sample_path.exists():
-        sample_path = OUT / "torque_comparison.png"
-    if not sample_path.exists():
-        from demo_assets.generate_demo_assets import main as gen_assets
-
-        gen_assets()
-    data = sample_path.read_bytes()
-    return analyze_dyno_image(data, "image/png")
+def vision_sample(request: Request):
+    if _is_rate_limited(request, max_per_min=12, key_name="vision_sample"):
+        return JSONResponse(
+            {"error": "Rate limit exceeded. Please wait a minute."}, status_code=429
+        )
+    p = _ensure_sample_chart()
+    return analyze_dyno_image(p.read_bytes(), "image/png")
 
 
 @app.post("/api/vision")
-async def vision(file: UploadFile = File(...)):
+async def vision(request: Request, file: UploadFile = File(...)):
+    if _is_rate_limited(request, max_per_min=12, key_name="vision"):
+        return JSONResponse(
+            {"error": "Rate limit exceeded. Please wait a minute."}, status_code=429
+        )
     data = await file.read()
     mime = file.content_type or "image/png"
     return analyze_dyno_image(data, mime)

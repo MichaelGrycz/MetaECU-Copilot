@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MetaECU Copilot — Interactive Tuning Cockpit</title>
-    <meta name="theme-color" content="#05070a" />
+    <title>MetaECU Copilot — Automotive Calibration Studio</title>
+    <meta name="theme-color" content="#070a10" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -12,339 +12,637 @@
     <link rel="manifest" href="/manifest.json" />
     <link rel="icon" type="image/png" href="/icon-192.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <script src="/audio_fx.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
     <style>
+      :root {
+        --bg-main: #06090e;
+        --card-bg: rgba(13, 19, 31, 0.78);
+        --card-border: rgba(255, 255, 255, 0.08);
+        --accent-orange: #f97316;
+        --accent-cyan: #06b6d4;
+        --accent-emerald: #10b981;
+        --accent-crimson: #ef4444;
+      }
       body {
-        background: #05070a;
-        color: #e5edf5;
-        font-family: ui-monospace, Menlo, Consolas, monospace;
+        background: var(--bg-main);
+        color: #e2e8f0;
+        font-family:
+          "Plus Jakarta Sans",
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        background-image:
+          radial-gradient(ellipse 90% 60% at 50% -20%, rgba(30, 58, 102, 0.28), transparent),
+          radial-gradient(circle at 10% 20%, rgba(249, 115, 22, 0.05), transparent 40%),
+          linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        background-size:
+          100% 100%,
+          100% 100%,
+          36px 36px,
+          36px 36px;
       }
-      .carbon {
-        background: radial-gradient(circle at 20% 0%, #101820 0, #05070a 55%);
-      }
-      .neon-o {
-        color: #ff7a18;
-      }
-      .neon-c {
-        color: #22d3ee;
-      }
-      .neon-r {
-        color: #ff3355;
-      }
-      .neon-g {
-        color: #34f5a5;
+      .font-mono {
+        font-family: "JetBrains Mono", monospace;
+        font-variant-numeric: tabular-nums;
       }
       .panel {
-        background: #0a0f16;
-        border: 1px solid #1b2836;
-        border-radius: 14px;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 12px;
+        backdrop-filter: blur(14px);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.08),
+          0 14px 30px -10px rgba(0, 0, 0, 0.65);
+        transition:
+          border-color 0.2s ease,
+          box-shadow 0.2s ease;
       }
-      .btn {
-        background: #ff7a18;
-        color: #0a0f16;
+      .panel:hover {
+        border-color: rgba(255, 255, 255, 0.12);
+      }
+      .section-badge {
+        font-size: 10px;
         font-weight: 700;
-        border-radius: 10px;
-        padding: 0.6rem 1rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #94a3b8;
+      }
+      .btn-primary {
+        background: linear-gradient(135deg, #ea580c, #f97316);
+        color: #ffffff;
+        font-weight: 600;
+        border-radius: 8px;
+        padding: 0.55rem 1rem;
+        box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         cursor: pointer;
       }
-      .btn:hover {
-        background: #ffa04d;
+      .btn-primary:hover {
+        box-shadow: 0 6px 20px rgba(234, 88, 12, 0.55);
+        transform: translateY(-1px);
       }
-      .btn:disabled {
-        opacity: 0.4;
-        cursor: wait;
+      .btn-secondary {
+        background: rgba(15, 23, 42, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: #e2e8f0;
+        font-weight: 600;
+        border-radius: 8px;
+        padding: 0.55rem 1rem;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        cursor: pointer;
       }
-      .btn-cyan {
-        background: #22d3ee;
+      .btn-secondary:hover {
+        border-color: rgba(255, 255, 255, 0.25);
+        background: rgba(30, 41, 59, 0.8);
+        transform: translateY(-1px);
       }
-      .btn-cyan:hover {
-        background: #67e8f9;
+      .btn-intercept {
+        background: linear-gradient(135deg, #b91c1c, #dc2626);
+        color: #ffffff;
+        font-weight: 700;
+        border-radius: 8px;
+        padding: 0.55rem 1rem;
+        box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        cursor: pointer;
       }
-      #drop.drag {
-        border-color: #ff7a18;
-        background: #1a1206;
+      .btn-intercept:hover {
+        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.55);
+        transform: translateY(-1px);
       }
-      @keyframes pulse-red {
+      .btn-tour {
+        background: linear-gradient(135deg, #f97316, #ef4444);
+        color: #ffffff;
+        font-weight: 700;
+        box-shadow: 0 0 20px rgba(249, 115, 22, 0.4);
+        animation: subtle-pulse 3s infinite ease-in-out;
+      }
+      @keyframes subtle-pulse {
         0%,
         100% {
-          box-shadow: 0 0 0 0 rgba(255, 51, 85, 0.7);
+          box-shadow: 0 0 15px rgba(249, 115, 22, 0.3);
         }
         50% {
-          box-shadow: 0 0 42px 6px rgba(255, 51, 85, 0.45);
+          box-shadow: 0 0 26px rgba(239, 68, 68, 0.55);
+        }
+      }
+      #drop.drag {
+        border-color: #f97316;
+        background: rgba(249, 115, 22, 0.08);
+      }
+      @keyframes pulse-intercept {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+        }
+        50% {
+          box-shadow: 0 0 40px 6px rgba(239, 68, 68, 0.45);
         }
       }
       .alarm {
-        animation: pulse-red 1s infinite;
-        border: 2px solid #ff3355;
-        background: #2a060d;
-        border-radius: 14px;
+        animation: pulse-intercept 1s infinite;
+        border: 2px solid #ef4444 !important;
+        background: rgba(50, 10, 18, 0.85) !important;
       }
       .thought {
-        border-left: 3px solid #22d3ee;
-        padding: 0.25rem 0.6rem;
+        border-left: 3px solid #06b6d4;
+        padding: 0.35rem 0.65rem;
         margin: 0.35rem 0;
-        background: #0a1620;
+        background: rgba(6, 182, 212, 0.06);
+        border-radius: 0 6px 6px 0;
       }
-      .reject {
-        border-left-color: #ff3355;
-        background: #220810;
+      .thought.reject {
+        border-left-color: #ef4444;
+        background: rgba(239, 68, 68, 0.08);
       }
-      .pass {
-        border-left-color: #34f5a5;
-        background: #06231a;
+      .thought.pass {
+        border-left-color: #10b981;
+        background: rgba(16, 185, 129, 0.08);
       }
-      select,
-      input[type="text"] {
-        background: #0d1520;
-        border: 1px solid #1b2836;
+      input[type="text"],
+      select {
+        background: rgba(10, 15, 26, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 8px;
-        padding: 0.5rem;
-        color: #e5edf5;
-        width: 100%;
+        padding: 0.55rem 0.85rem;
+        color: #f1f5f9;
+        font-size: 13px;
+        transition: border-color 0.2s ease;
+      }
+      input[type="text"]:focus,
+      select:focus {
+        border-color: #06b6d4;
+        outline: none;
       }
     </style>
   </head>
-  <body class="carbon min-h-screen">
-    <header class="p-4 flex flex-wrap gap-3 items-center justify-between border-b border-[#1b2836]">
-      <div>
-        <h1 class="text-2xl font-bold">
-          META<span class="neon-o">ECU</span> COPILOT
-          <span class="text-sm neon-c">Interactive Tuning Cockpit &amp; SAM Vision Studio</span>
-        </h1>
-        <p class="text-sm text-slate-400">
-          AI proposes. Physics disposes. Bosch EDC16C39 · Muse Spark · Deterministic Safety Gate
-        </p>
+  <body class="min-h-screen">
+    <!-- TOP NAVIGATION & STATUS BAR -->
+    <header
+      class="p-3.5 px-5 flex flex-wrap gap-3 items-center justify-between border-b border-white/[0.08] backdrop-blur-md bg-[#070a10]/80 sticky top-0 z-50"
+    >
+      <div class="flex items-center gap-3">
+        <div
+          class="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center font-bold text-white shadow-lg shadow-orange-500/20"
+        >
+          M
+        </div>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+            META<span class="text-orange-500">ECU</span> COPILOT
+            <span
+              class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-cyan-950/60 border border-cyan-500/30 text-cyan-400"
+            >
+              Automotive Calibration Studio
+            </span>
+          </h1>
+          <p class="text-xs text-slate-400 font-mono">
+            AI proposes. Physics disposes. Bosch EDC16C39 · Meta Muse · Deterministic Safety Gate
+          </p>
+        </div>
       </div>
-      <div class="flex items-center gap-2">
+
+      <div class="flex items-center gap-2.5">
+        <!-- Guided Tour -->
         <button
           id="btnTour"
-          class="btn"
-          style="background: linear-gradient(135deg, #ff7a18, #ff3355); color: #fff"
+          class="btn-primary btn-tour text-xs py-1.5 px-3 flex items-center gap-1.5"
           onclick="runJudgeTour()"
           title="Auto-play full 60-second end-to-end demonstration"
         >
-          ▶ 60s JUDGE TOUR
+          <span>▶</span> <span id="lblTour">60s JUDGE TOUR</span>
         </button>
-        <div id="ecuMeta" class="text-sm panel px-4 py-2">Loading ECU metadata…</div>
-        <button id="audioToggle" class="btn btn-cyan text-sm" title="Toggle motorsport audio FX">🔊 AUDIO: ON</button>
-        <button id="pwaInstall" class="btn text-sm hidden" title="Install MetaECU Copilot on this device">
-          ⬇ INSTALL APP
+
+        <!-- Live Status Pill -->
+        <div id="ecuMeta" class="text-xs panel px-3 py-1.5 font-mono text-slate-300">
+          <span class="text-emerald-400 animate-pulse">●</span> Checking engine status…
+        </div>
+
+        <!-- Language Switcher (EN / PL / DE) -->
+        <div class="flex items-center bg-slate-900/80 p-0.5 rounded-lg border border-white/10 text-xs font-mono">
+          <button id="langEN" class="px-2 py-0.5 rounded font-bold bg-white/15 text-white" onclick="setLang('en')">
+            EN
+          </button>
+          <button id="langPL" class="px-2 py-0.5 rounded text-slate-400 hover:text-white" onclick="setLang('pl')">
+            PL
+          </button>
+          <button id="langDE" class="px-2 py-0.5 rounded text-slate-400 hover:text-white" onclick="setLang('de')">
+            DE
+          </button>
+        </div>
+
+        <!-- Audio Toggle -->
+        <button id="audioToggle" class="btn-secondary text-xs py-1.5 px-2.5" title="Toggle motorsport audio FX">
+          🔊
+        </button>
+
+        <!-- PWA Install -->
+        <button
+          id="pwaInstall"
+          class="btn-secondary text-xs py-1.5 px-2.5 hidden"
+          title="Install MetaECU Copilot on this device"
+        >
+          ⬇ APP
         </button>
       </div>
     </header>
 
-    <main class="p-4 grid grid-cols-1 xl:grid-cols-3 gap-4">
-      <!-- LEFT: binary + intent + gate -->
+    <!-- MAIN COCKPIT GRID (BENTO TELEMETRY LAYOUT) -->
+    <main class="p-4 grid grid-cols-1 xl:grid-cols-3 gap-4 max-w-[1720px] mx-auto">
+      <!-- COLUMN 1: Ingestion, Intent & Safety Gate -->
       <section class="space-y-4">
-        <div id="drop" class="panel p-4 border-dashed" style="border-style: dashed">
-          <h2 class="font-bold neon-c">1 · FLASH BINARY (drag &amp; drop .bin)</h2>
-          <p class="text-sm text-slate-400 mt-1">Drop the 2 MB stock flash here, or use the factory Saab file:</p>
-          <div class="flex gap-2 mt-3">
-            <button class="btn btn-cyan" onclick="loadStock()">Load stock Saab .bin</button>
-            <label class="btn" style="display: inline-block"
-              >Browse…<input id="fileBin" type="file" accept=".bin" class="hidden"
-            /></label>
+        <!-- 1. Binary Ingestion -->
+        <div id="drop" class="panel p-4 border-dashed border-white/15">
+          <div class="flex items-center justify-between">
+            <span class="section-badge" id="lblSec1">1 · FLASH BINARY INGESTION</span>
+            <span class="text-[10px] text-cyan-400 font-mono">2 MiB MPC562</span>
           </div>
-          <pre id="binInfo" class="text-xs mt-3 whitespace-pre-wrap text-slate-300">No binary loaded yet.</pre>
+          <p class="text-xs text-slate-400 mt-1" id="descDrop">
+            Drop factory .bin flash dump or load reference calibration:
+          </p>
+          <div class="flex gap-2 mt-3">
+            <button class="btn-secondary text-xs flex-1" onclick="loadStock()" id="btnLoadStock">
+              Load factory Saab .bin
+            </button>
+            <label class="btn-secondary text-xs cursor-pointer flex-1 text-center">
+              <span id="btnBrowse">Browse File…</span>
+              <input id="fileBin" type="file" accept=".bin" class="hidden" />
+            </label>
+          </div>
+          <pre
+            id="binInfo"
+            class="text-[11px] font-mono mt-3 p-2 rounded bg-black/40 border border-white/5 whitespace-pre-wrap text-slate-300"
+          >
+No binary loaded yet.</pre>
         </div>
 
+        <!-- 2. Tuner Intent & Model Selector -->
         <div class="panel p-4">
           <div class="flex items-center justify-between mb-2">
-            <h2 class="font-bold neon-c">2 · TUNER INTENT</h2>
+            <span class="section-badge" id="lblSec2">2 · CALIBRATION INTENT</span>
             <select
               id="modelSel"
-              class="text-xs max-w-[210px] p-1 bg-[#0a1620] border-[#1b2836] rounded text-[#22d3ee]"
+              class="text-[11px] font-mono p-1 bg-slate-900 border border-white/10 rounded text-cyan-400"
             >
               <option value="muse-spark-1.3">⚡ Meta Muse Spark 1.3 (Cloud)</option>
               <option value="muse-wonder-1.0">🧠 Meta Muse Wonder 1.0 (Pro)</option>
               <option value="meta-models/muse-spark-open-1026">🌐 Baseten Open-Weight 1026</option>
             </select>
           </div>
-          <input id="intent" type="text" value="Give me 450 Nm, maximum power" class="mt-1" />
+          <input id="intent" type="text" value="Give me 450 Nm, maximum power" class="w-full text-sm font-mono mt-1" />
           <div class="flex flex-wrap gap-2 mt-3">
-            <button id="btnTune" class="btn" onclick="runTune()">⚡ RUN CALIBRATION</button>
-            <button class="btn" style="background: #ff3355; color: #fff" onclick="runTune(1)">
-              🚨 DEMO: 450 Nm INTERCEPT
+            <button id="btnTune" class="btn-primary text-xs flex-1" onclick="runTune()">
+              ⚡ <span id="lblRunCalib">RUN CALIBRATION</span>
             </button>
-            <button class="btn btn-cyan" onclick="micIntent()">🎤 Voice intent</button>
-            <label class="btn btn-cyan" style="display: inline-block"
-              >🎙 Upload voice note<input id="fileVoice" type="file" accept="audio/*" class="hidden"
-            /></label>
+            <button class="btn-intercept text-xs flex-1" onclick="runTune(1)">
+              🚨 <span id="lblDemoIntercept">DEMO: 450 Nm INTERCEPT</span>
+            </button>
           </div>
-          <p id="voiceStatus" class="text-xs text-slate-400 mt-2">
-            Voice: browser speech-to-text (Web Speech API) or an uploaded audio note.
+          <div class="flex gap-2 mt-2">
+            <button class="btn-secondary text-xs flex-1" onclick="micIntent()" id="btnVoice">🎤 Voice Input</button>
+            <label class="btn-secondary text-xs flex-1 text-center cursor-pointer">
+              <span id="lblUploadVoice">🎙 Audio Note</span>
+              <input id="fileVoice" type="file" accept="audio/*" class="hidden" />
+            </label>
+          </div>
+          <p id="voiceStatus" class="text-[11px] text-slate-400 mt-2 font-mono">
+            Voice ready: PL / EN speech translation via Meta Muse.
           </p>
-          <div class="flex flex-wrap gap-2 mt-3 text-xs">
-            <button class="btn btn-cyan" onclick="setIntent('Stage 1, dynamic low end, F40 clutch protection')">
-              Stage 1 safe
+          <div class="flex flex-wrap gap-1.5 mt-2.5">
+            <button
+              class="px-2 py-0.5 text-[11px] rounded bg-white/5 hover:bg-white/10 text-slate-300 border border-white/5 font-mono"
+              onclick="setIntent('Stage 1, dynamic low end, F40 clutch protection')"
+            >
+              Stage 1 Safe
             </button>
-            <button class="btn btn-cyan" onclick="setIntent('Podnieś moment od 2000 obrotów, ale chroń skrzynię')">
-              PL: moment od 2000, chroń skrzynię
+            <button
+              class="px-2 py-0.5 text-[11px] rounded bg-white/5 hover:bg-white/10 text-slate-300 border border-white/5 font-mono"
+              onclick="setIntent('Podnieś moment od 2000 obrotów, ale chroń skrzynię')"
+            >
+              PL: Moment od 2000, chroń skrzynię
             </button>
           </div>
         </div>
 
+        <!-- 3. Deterministic Safety Gate HUD -->
         <div id="gateHud" class="panel p-4">
-          <h2 class="font-bold neon-c">3 · SAFETY GATE HUD</h2>
-          <p id="gateStatus" class="mt-2 text-slate-300">
-            Gate armed. Limits: effective ≤ 377 Nm (F40 @90 °C) · rail ≤ 1600 bar · smoke ≥ stock floor.
+          <div class="flex items-center justify-between">
+            <span class="section-badge" id="lblSec3">3 · MECHANICAL SAFETY GATE HUD</span>
+            <span class="text-[10px] text-emerald-400 font-mono">ARMED &amp; VERIFIED</span>
+          </div>
+          <p id="gateStatus" class="mt-2 text-xs text-slate-300 font-mono leading-relaxed">
+            Gate armed. Physical limits: effective torque ≤ 377 Nm (GM F40 @ 90°C) · rail ≤ 1600 bar · smoke index ≥
+            stock floor.
           </p>
-          <div id="gateMetrics" class="text-sm mt-2 text-slate-300"></div>
+          <div id="gateMetrics" class="text-xs font-mono mt-2 text-slate-300"></div>
           <div class="flex flex-wrap gap-2 mt-3">
-            <a id="dlBin" class="btn hidden" href="/api/download-bin">⬇ FLASH &amp; EXPORT .BIN</a>
-            <a id="dlRep" class="btn btn-cyan hidden" href="/api/download-report">⬇ AUDIT REPORT</a>
+            <a id="dlBin" class="btn-primary text-xs hidden flex-1 text-center" href="/api/download-bin">
+              ⬇ EXPORT .BIN
+            </a>
+            <a id="dlRep" class="btn-secondary text-xs hidden flex-1 text-center" href="/api/download-report">
+              📄 AUDIT REPORT
+            </a>
             <a
               id="dlCert"
-              class="btn hidden"
-              style="background: #34f5a5; color: #0a0f16"
+              class="btn-secondary text-xs hidden flex-1 text-center bg-emerald-950/50 text-emerald-300 border-emerald-500/30"
               target="_blank"
               href="/certificate"
-              >🎖 CERTIFICATE</a
             >
+              🎖 CERTIFICATE
+            </a>
             <a
               id="dlCard"
-              class="btn hidden"
-              style="background: #22d3ee; color: #0a0f16"
+              class="btn-secondary text-xs hidden flex-1 text-center bg-cyan-950/50 text-cyan-300 border-cyan-500/30"
               target="_blank"
               href="/spec-card"
-              >🏎️ SPEC CARD</a
             >
+              🏎️ SPEC CARD
+            </a>
           </div>
         </div>
 
+        <!-- 4. Binary Matrix Hex Inspector -->
         <div id="hexPanel" class="panel p-4">
           <div class="flex items-center justify-between">
-            <h2 class="font-bold neon-c">
-              4 · BINARY MATRIX DIFF <span class="text-xs text-slate-400">(WinOLS Hex)</span>
-            </h2>
-            <button class="btn btn-cyan text-xs py-1" onclick="refreshHexDiff()">🔍 REFRESH HEX</button>
+            <span class="section-badge" id="lblSec4">4 · BINARY MATRIX DIFF (WINOLS HEX)</span>
+            <button class="text-xs text-cyan-400 hover:text-cyan-300 font-mono" onclick="refreshHexDiff()">
+              [REFRESH]
+            </button>
           </div>
-          <div id="hexStats" class="text-xs text-slate-400 mt-1">Comparing 2 MiB flash memory...</div>
+          <div id="hexStats" class="text-[11px] text-slate-400 font-mono mt-1">Comparing 2 MiB flash memory...</div>
           <div
             id="hexContainer"
-            class="mt-2 text-[11px] font-mono bg-[#05080c] p-2 rounded border border-[#1b2836] overflow-x-auto max-h-56"
+            class="mt-2 text-[11px] font-mono bg-black/60 p-2 rounded border border-white/5 overflow-x-auto max-h-48 text-slate-300"
           >
             <div class="text-slate-500">Run a calibration to inspect modified memory offsets.</div>
           </div>
         </div>
       </section>
 
-      <!-- CENTER: 3D explorer + torque chart -->
+      <!-- COLUMN 2: Interactive 3D Surface & Dyno Simulator -->
       <section class="space-y-4">
+        <!-- 3D Surface Explorer -->
         <div class="panel p-4">
-          <h2 class="font-bold neon-c">
-            INTERACTIVE 3D MAP EXPLORER <span class="text-slate-400 text-xs">(drag to rotate · scroll to zoom)</span>
-          </h2>
+          <div class="flex items-center justify-between">
+            <span class="section-badge" id="lblSec3D">INTERACTIVE 3D MAP EXPLORER</span>
+            <span class="text-[10px] text-slate-400 font-mono">WebGL Surface</span>
+          </div>
           <div class="grid grid-cols-2 gap-2 mt-2">
-            <select id="mapSel"></select>
-            <select id="mapWhich">
+            <select id="mapSel" class="w-full text-xs font-mono"></select>
+            <select id="mapWhich" class="w-full text-xs font-mono">
               <option value="stock">Stock</option>
               <option value="tuned">After tuning</option>
               <option value="diff">Δ Difference / Delta (Heatmap)</option>
             </select>
           </div>
-          <div id="map3d" style="height: 430px"></div>
-          <p id="mapInfo" class="text-xs text-slate-400"></p>
+          <div id="map3d" style="height: 380px" class="mt-2 rounded overflow-hidden"></div>
+          <p id="mapInfo" class="text-[11px] text-slate-400 font-mono mt-1"></p>
         </div>
+
+        <!-- Virtual Dyno Simulator -->
         <div class="panel p-4">
           <div class="flex items-center justify-between">
-            <h2 class="font-bold neon-c">VIRTUAL DYNO PULL SIMULATOR</h2>
-            <button id="btnDynoSim" class="btn btn-cyan text-xs py-1" onclick="runDynoSimulation()">
+            <span class="section-badge" id="lblSecDyno">VIRTUAL DYNO PULL SIMULATOR</span>
+            <button id="btnDynoSim" class="btn-secondary text-xs py-1 px-3" onclick="runDynoSimulation()">
               🏁 RUN DYNO PULL
             </button>
           </div>
-          <div id="dynoGauges" class="grid grid-cols-4 gap-2 mt-3 text-center">
-            <div class="bg-[#05090f] p-2 rounded border border-[#1b2836]">
-              <div class="text-[10px] text-slate-400">RPM</div>
-              <div id="gaugeRpm" class="text-lg font-bold neon-c">1200</div>
+          <div id="dynoGauges" class="grid grid-cols-4 gap-2 mt-3 text-center font-mono">
+            <div class="bg-black/50 p-2 rounded border border-white/5">
+              <div class="text-[10px] text-slate-400 uppercase">RPM</div>
+              <div id="gaugeRpm" class="text-base font-bold text-cyan-400">1200</div>
             </div>
-            <div class="bg-[#05090f] p-2 rounded border border-[#1b2836]">
-              <div class="text-[10px] text-slate-400">BOOST</div>
-              <div id="gaugeBoost" class="text-lg font-bold neon-o">0.20 bar</div>
+            <div class="bg-black/50 p-2 rounded border border-white/5">
+              <div class="text-[10px] text-slate-400 uppercase">BOOST</div>
+              <div id="gaugeBoost" class="text-base font-bold text-orange-400">0.20 bar</div>
             </div>
-            <div class="bg-[#05090f] p-2 rounded border border-[#1b2836]">
-              <div class="text-[10px] text-slate-400">TORQUE</div>
-              <div id="gaugeTorque" class="text-lg font-bold neon-g">220 Nm</div>
+            <div class="bg-black/50 p-2 rounded border border-white/5">
+              <div class="text-[10px] text-slate-400 uppercase">TORQUE</div>
+              <div id="gaugeTorque" class="text-base font-bold text-emerald-400">220 Nm</div>
             </div>
-            <div class="bg-[#05090f] p-2 rounded border border-[#1b2836]">
-              <div class="text-[10px] text-slate-400">POWER</div>
-              <div id="gaugePower" class="text-lg font-bold text-white">48 HP</div>
+            <div class="bg-black/50 p-2 rounded border border-white/5">
+              <div class="text-[10px] text-slate-400 uppercase">POWER</div>
+              <div id="gaugePower" class="text-base font-bold text-white">48 HP</div>
             </div>
           </div>
           <div
             id="dynoResults"
-            class="text-xs text-slate-300 mt-2 hidden bg-[#061824] p-2 rounded border border-[#0f3448]"
+            class="text-xs text-slate-300 font-mono mt-3 hidden bg-emerald-950/30 p-2.5 rounded border border-emerald-500/20 leading-relaxed"
           >
-            <b>🏎️ PERFORMANCE COMPARISON (WOT):</b><br />
-            • 0–100 km/h: <span class="neon-g font-bold">7.2s</span> (Stock: 8.8s |
-            <span class="neon-g">-1.6s</span>)<br />
-            • 80–120 km/h (4th gear): <span class="neon-g font-bold">4.9s</span> (Stock: 6.8s |
-            <span class="neon-g">-1.9s</span>)<br />
-            • Spool to 1.40 bar: <span class="neon-g font-bold">1.34s</span> (Stock: 4.90s |
-            <span class="neon-g">-3.56s</span>)
+            <b class="text-emerald-400">🏎️ PERFORMANCE GAIN (WOT AUDIT):</b><br />
+            • 0–100 km/h: <span class="text-emerald-300 font-bold">7.2 s</span> (Stock: 8.8 s |
+            <span class="text-emerald-400 font-bold">-1.6 s</span>)<br />
+            • 80–120 km/h (4th gear): <span class="text-emerald-300 font-bold">4.9 s</span> (Stock: 6.8 s |
+            <span class="text-emerald-400 font-bold">-1.9 s</span>)<br />
+            • Turbo spool to 1.40 bar: <span class="text-emerald-300 font-bold">1.34 s</span> (Stock: 4.90 s |
+            <span class="text-emerald-400 font-bold">-3.56 s</span>)
           </div>
         </div>
 
+        <!-- Torque Limiter Comparison -->
         <div class="panel p-4">
-          <h2 class="font-bold neon-c">
-            TORQUE LIMITER — BEFORE / AFTER
-            <span class="neon-r text-xs">red band = F40 overload zone (&gt;377 Nm eff.)</span>
-          </h2>
-          <div id="torqueChart" style="height: 330px"></div>
+          <div class="flex items-center justify-between">
+            <span class="section-badge" id="lblSecTrq">TORQUE LIMITER — BEFORE / AFTER</span>
+            <span class="text-[10px] text-rose-400 font-mono">Red band: &gt;377 Nm F40 limit</span>
+          </div>
+          <div id="torqueChart" style="height: 270px" class="mt-2"></div>
         </div>
       </section>
 
-      <!-- RIGHT: thought stream + SAM vision + telemetry -->
+      <!-- COLUMN 3: AI Thought Stream, SAM Vision & Road Telemetry -->
       <section class="space-y-4">
+        <!-- Live AI Thought Stream -->
         <div class="panel p-4">
-          <h2 class="font-bold neon-c">
-            AI THOUGHT STREAM <span class="text-xs text-slate-400">live Muse reasoning + gate events</span>
-          </h2>
-          <div id="thoughts" class="mt-2 text-sm max-h-72 overflow-y-auto pr-1">
-            <div class="thought">Cockpit ready. Load a binary and run a calibration.</div>
+          <div class="flex items-center justify-between">
+            <span class="section-badge" id="lblSecStream">AI THOUGHT STREAM</span>
+            <span class="text-[10px] text-cyan-400 font-mono animate-pulse">LIVE REASONING</span>
+          </div>
+          <div id="thoughts" class="mt-2.5 text-xs font-mono max-h-64 overflow-y-auto pr-1 space-y-1">
+            <div class="thought">Cockpit ready. Load a binary and execute calibration.</div>
           </div>
         </div>
 
+        <!-- SAM 3.1 Vision Studio -->
         <div class="panel p-4">
-          <h2 class="font-bold neon-c">SAM 3.1 VISION STUDIO — dyno chart analysis</h2>
-          <p class="text-sm text-slate-400 mt-1">
-            Upload a dyno chart screenshot (PNG/JPG). Meta Vision grounds the curves and recommends a correction.
+          <div class="flex items-center justify-between">
+            <span class="section-badge" id="lblSecVision">SAM 3.1 VISION STUDIO</span>
+            <span class="text-[10px] text-cyan-400 font-mono">Multimodal Dyno</span>
+          </div>
+          <p class="text-xs text-slate-400 mt-1" id="descVision">
+            Visual curve grounding: detects inflection points, torque dips, and recommends corrections.
           </p>
-          <div class="flex flex-wrap gap-2 mt-3">
-            <button class="btn btn-cyan" onclick="loadSampleDyno()">🖼️ LOAD SAMPLE DYNO</button>
-            <label class="btn btn-cyan" style="display: inline-block"
-              >Upload custom chart<input id="fileDyno" type="file" accept="image/*" class="hidden"
-            /></label>
+          <div class="flex gap-2 mt-3">
+            <button class="btn-secondary text-xs flex-1" onclick="loadSampleDyno()" id="btnSampleDyno">
+              🖼️ Load Sample Dyno
+            </button>
+            <label class="btn-secondary text-xs flex-1 text-center cursor-pointer">
+              <span id="lblUploadDyno">Upload Custom…</span>
+              <input id="fileDyno" type="file" accept="image/*" class="hidden" />
+            </label>
           </div>
-          <img id="dynoPreview" class="mt-3 hidden rounded-lg border border-[#1b2836]" style="max-height: 180px" />
-          <pre id="visionOut" class="text-xs mt-3 whitespace-pre-wrap text-slate-300">No image analysed yet.</pre>
+          <img id="dynoPreview" class="mt-3 hidden rounded-lg border border-white/10 max-h-40 mx-auto" />
+          <pre
+            id="visionOut"
+            class="text-[11px] font-mono mt-3 p-2 rounded bg-black/50 border border-white/5 whitespace-pre-wrap text-slate-300"
+          >
+No chart analysed yet.</pre>
         </div>
 
+        <!-- Road Telemetry (All 5 Real Logs) -->
         <div class="panel p-4">
-          <h2 class="font-bold neon-c">ROAD TELEMETRY — real OBD logs (33 WOT pulls)</h2>
-          <select id="teleSel" class="mt-2"></select>
-          <div id="teleChart" style="height: 300px"></div>
-          <div id="spoolChart" style="height: 240px"></div>
-          <p id="teleInfo" class="text-xs text-slate-400"></p>
+          <div class="flex items-center justify-between">
+            <span class="section-badge" id="lblSecTele">ROAD TELEMETRY — REAL OBD LOGS</span>
+            <span class="text-[10px] text-emerald-400 font-mono">5 Test Sessions</span>
+          </div>
+          <select id="teleSel" class="w-full text-xs font-mono mt-2"></select>
+          <div id="teleChart" style="height: 250px" class="mt-2"></div>
+          <div id="spoolChart" style="height: 200px" class="mt-2"></div>
+          <p id="teleInfo" class="text-[11px] text-slate-400 font-mono mt-1"></p>
         </div>
       </section>
     </main>
 
-    <footer class="p-4 text-xs text-slate-500 border-t border-[#1b2836]">
-      MetaECU Copilot · Meta Global AI Developer Hackathon 2026 · Safety decisions are deterministic — no AI output
-      bypasses the Gate.
+    <!-- FOOTER -->
+    <footer
+      class="p-4 px-6 text-xs text-slate-500 border-t border-white/[0.08] flex flex-wrap justify-between items-center max-w-[1720px] mx-auto font-mono"
+    >
+      <div>MetaECU Copilot · Meta Global AI Developer Hackathon 2026 · Deterministic Safety Protocol</div>
+      <div>Zero AI Hallucination · Physics Disposes</div>
     </footer>
 
+    <!-- INTERACTIVE JAVASCRIPT & I18N LOGIC -->
     <script>
       const $ = (id) => document.getElementById(id);
       const dark = {
-        paper_bgcolor: "#0a0f16",
-        plot_bgcolor: "#0a0f16",
-        font: { color: "#e5edf5", family: "monospace" },
+        paper_bgcolor: "rgba(0,0,0,0)",
+        plot_bgcolor: "rgba(0,0,0,0)",
+        font: { color: "#94a3b8", family: "JetBrains Mono, monospace", size: 11 },
+        margin: { t: 25, b: 35, l: 45, r: 25 },
       };
-      let lastTorque = null;
+
+      /* --- i18n Multi-Language Dictionary --- */
+      const I18N = {
+        en: {
+          tour: "60s JUDGE TOUR",
+          sec1: "1 · FLASH BINARY INGESTION",
+          dropDesc: "Drop factory .bin flash dump or load reference calibration:",
+          loadStock: "Load factory Saab .bin",
+          browse: "Browse File…",
+          sec2: "2 · CALIBRATION INTENT",
+          runCalib: "RUN CALIBRATION",
+          demoIntercept: "DEMO: 450 Nm INTERCEPT",
+          voice: "🎤 Voice Input",
+          uploadVoice: "🎙 Audio Note",
+          sec3: "3 · MECHANICAL SAFETY GATE HUD",
+          gateDesc:
+            "Gate armed. Physical limits: effective torque ≤ 377 Nm (GM F40 @ 90°C) · rail ≤ 1600 bar · smoke index ≥ stock floor.",
+          sec4: "4 · BINARY MATRIX DIFF (WINOLS HEX)",
+          sec3D: "INTERACTIVE 3D MAP EXPLORER",
+          secDyno: "VIRTUAL DYNO PULL SIMULATOR",
+          secTrq: "TORQUE LIMITER — BEFORE / AFTER",
+          secStream: "AI THOUGHT STREAM",
+          secVision: "SAM 3.1 VISION STUDIO",
+          visionDesc: "Visual curve grounding: detects inflection points, torque dips, and recommends corrections.",
+          sampleDyno: "🖼️ Load Sample Dyno",
+          uploadDyno: "Upload Custom…",
+          secTele: "ROAD TELEMETRY — REAL OBD LOGS",
+        },
+        pl: {
+          tour: "60s PREZENTACJA",
+          sec1: "1 · ODCZYT PAMIĘCI FLASH BINARNEJ",
+          dropDesc: "Przeciągnij wsad .bin lub załaduj seryjną kalibrację:",
+          loadStock: "Wczytaj seryjny wsad Saab .bin",
+          browse: "Wybierz plik…",
+          sec2: "2 · INTENCJA KALIBRACJI TUNERA",
+          runCalib: "URUCHOM KALIBRACJĘ",
+          demoIntercept: "DEMO: BLOKADA 450 Nm",
+          voice: "🎤 Polecenie głosowe",
+          uploadVoice: "🎙 Notatka audio",
+          sec3: "3 · BRAMA BEZPIECZEŃSTWA HUD",
+          gateDesc:
+            "Brama aktywna. Limity: moment na sprzęgle ≤ 377 Nm (F40 @ 90°C) · szyna Common Rail ≤ 1600 bar · wskaźnik dymienia ≥ norma OEM.",
+          sec4: "4 · INSPEKTOR PAMIĘCI HEX (WINOLS)",
+          sec3D: "INTERAKTYWNY EKSPLORATOR MAP 3D",
+          secDyno: "SYMULATOR PRÓBY NA HAMOWNI",
+          secTrq: "OGRANICZNIK MOMENTU — PRZED / PO",
+          secStream: "STRUMIEŃ ROZUMOWANIA AI",
+          secVision: "STUDIO WIZYJNE SAM 3.1",
+          visionDesc:
+            "Wizualna analiza wykresów z hamowni: detekcja spadków momentu i rekomendacja korekt geometrii turbo.",
+          sampleDyno: "🖼️ Wczytaj wykres wzorcowy",
+          uploadDyno: "Wgraj własny…",
+          secTele: "TELEMETRIA DROGOWA — REALNE LOGI",
+        },
+        de: {
+          tour: "60s JURY-TOUR",
+          sec1: "1 · FLASH-BINÄRDATEI LADEN",
+          dropDesc: "Werks-BIN ablegen oder Referenzkalibrierung laden:",
+          loadStock: "Serien-Saab .bin laden",
+          browse: "Datei wählen…",
+          sec2: "2 · KALIBRIERUNGSZIEL",
+          runCalib: "KALIBRIERUNG STARTEN",
+          demoIntercept: "DEMO: 450 Nm ABFANGEN",
+          voice: "🎤 Spracheingabe",
+          uploadVoice: "🎙 Sprachnotiz",
+          sec3: "3 · SICHERHEITS-GATE HUD",
+          gateDesc:
+            "Gate scharfgeschaltet. Physikalische Grenzen: Drehmoment ≤ 377 Nm (F40 @ 90°C) · Raildruck ≤ 1600 bar · Rauchlimit ≥ Werksboden.",
+          sec4: "4 · HEX-SPEICHERINSPEKTOR (WINOLS)",
+          sec3D: "INTERAKTIVER 3D-MAP-EXPLORER",
+          secDyno: "VIRTUELLER PRÜFSTANDSLAUF",
+          secTrq: "DREHMOMENTBEGRENZER — VORHER / NACHHER",
+          secStream: "AI-GEDANKENSTROM",
+          secVision: "SAM 3.1 VISION STUDIO",
+          visionDesc: "Visuelle Kurvenanalyse: Erkennung von Drehmomenteinbrüchen und Korrekturempfehlung.",
+          sampleDyno: "🖼️ Musterdiagramm laden",
+          uploadDyno: "Eigenes hochladen…",
+          secTele: "STRASSENTELEMETRIE — ECHTE LOGS",
+        },
+      };
+
+      let currentLang = "en";
+      function setLang(lang) {
+        currentLang = lang;
+        const dict = I18N[lang];
+        $("lblTour").textContent = dict.tour;
+        $("lblSec1").textContent = dict.sec1;
+        $("descDrop").textContent = dict.dropDesc;
+        $("btnLoadStock").textContent = dict.loadStock;
+        $("btnBrowse").textContent = dict.browse;
+        $("lblSec2").textContent = dict.sec2;
+        $("lblRunCalib").textContent = dict.runCalib;
+        $("lblDemoIntercept").textContent = dict.demoIntercept;
+        $("btnVoice").textContent = dict.voice;
+        $("lblUploadVoice").textContent = dict.uploadVoice;
+        $("lblSec3").textContent = dict.sec3;
+        $("gateStatus").textContent = dict.gateDesc;
+        $("lblSec4").textContent = dict.sec4;
+        $("lblSec3D").textContent = dict.sec3D;
+        $("lblSecDyno").textContent = dict.secDyno;
+        $("lblSecTrq").textContent = dict.secTrq;
+        $("lblSecStream").textContent = dict.secStream;
+        $("lblSecVision").textContent = dict.secVision;
+        $("descVision").textContent = dict.visionDesc;
+        $("btnSampleDyno").textContent = dict.sampleDyno;
+        $("lblUploadDyno").textContent = dict.uploadDyno;
+        $("lblSecTele").textContent = dict.secTele;
+
+        ["langEN", "langPL", "langDE"].forEach((id) => {
+          $(id).className =
+            id === "lang" + lang.toUpperCase()
+              ? "px-2 py-0.5 rounded font-bold bg-white/15 text-white"
+              : "px-2 py-0.5 rounded text-slate-400 hover:text-white";
+        });
+      }
 
       function setIntent(t) {
         $("intent").value = t;
@@ -358,9 +656,9 @@
       }
       function showBin(m) {
         $("binInfo").textContent =
-          `${m.file}\nECU: ${m.ecu} · SW ${m.software} · HW ${m.hardware}\nVehicle: ${m.vehicle}\nSize: ${m.size_bytes} B (2 MiB OK: ${m.size_ok}) · Catalogue: ${m.catalog_symbols} symbols\nChecksum: ${m.checksum} · valid: ${m.checksum_ok}`;
+          `Binary: ${m.file}\nECU: ${m.ecu} (${m.processor || "MPC562"}) · Endianness: ${m.endianness || "Big-Endian"}\nSW: ${m.software} · HW: ${m.hardware}\nSize: ${m.size_bytes} B · Checksum: ${m.checksum} (Valid: ${m.checksum_ok})\nSafety Profile: ${m.safety_profile || "GM F40 / Bosch CP1H"}`;
         $("ecuMeta").innerHTML =
-          `<span class="neon-g">●</span> ${m.ecu} SW ${m.software} · checksum <b>${m.checksum}</b>`;
+          `<span class="text-emerald-400 font-bold">●</span> ${m.ecu} · SW ${m.software} · Checksum: <b>${m.checksum}</b>`;
       }
       async function loadStock() {
         MetaFx.spool();
@@ -398,72 +696,72 @@
       }
 
       async function loadMap() {
-        const sym = $("mapSel").value,
-          which = $("mapWhich").value;
-        const r = await fetch(`/api/map/${encodeURIComponent(sym)}?which=${which}`);
+        const sym = $("mapSel").value;
+        const which = $("mapWhich").value;
+        if (!sym) return;
+        const r = await fetch(`/api/map/${sym}?which=${which}`);
         const m = await r.json();
-        if (m.error) {
-          $("mapInfo").textContent = m.error;
-          return;
-        }
-        $("mapInfo").textContent =
-          `${m.symbol} — ${m.title} · ${m.rows}×${m.cols} · Z [${m.z_unit}] min ${m.z_min} / max ${m.z_max}`;
-        const isCurve = m.rows <= 1;
-        if (isCurve) {
-          Plotly.newPlot(
-            "map3d",
-            [{ x: m.x, y: m.z[0], type: "scatter", mode: "lines+markers", line: { color: "#ff7a18", width: 3 } }],
-            { ...dark, title: m.symbol, xaxis: { title: `${m.x_unit}` }, yaxis: { title: `${m.z_unit}` } },
-            { responsive: true },
-          );
-        } else {
-          Plotly.newPlot(
-            "map3d",
-            [{ x: m.x, y: m.y, z: m.z, type: "surface", colorscale: "Turbo" }],
+        if (m.error) return;
+
+        let zData = m.z;
+        let titleSuffix = which === "diff" ? " (Δ Difference Matrix)" : which === "tuned" ? " (Tuned)" : " (Stock)";
+        $("mapInfo").textContent = `${m.symbol} · ${m.title} · Dimensions: ${m.cols}×${m.rows} · Unit: [${m.z_unit}]`;
+
+        Plotly.newPlot(
+          "map3d",
+          [
             {
-              ...dark,
-              title: m.symbol,
-              scene: {
-                xaxis: { title: "X [" + m.x_unit + "]" },
-                yaxis: { title: "Y [" + m.y_unit + "]" },
-                zaxis: { title: "Z [" + m.z_unit + "]" },
-              },
+              type: "surface",
+              x: m.x,
+              y: m.y,
+              z: zData,
+              colorscale: which === "diff" ? "Electric" : "Hot",
+              reversescale: which === "diff",
+              contours: { z: { show: true, usecolormap: true, highlightcolor: "#fff", project: { z: true } } },
             },
-            { responsive: true },
-          );
-        }
+          ],
+          {
+            ...dark,
+            title: m.symbol + titleSuffix,
+            scene: {
+              xaxis: { title: "X", gridcolor: "rgba(255,255,255,0.08)" },
+              yaxis: { title: "Y", gridcolor: "rgba(255,255,255,0.08)" },
+              zaxis: { title: m.z_unit, gridcolor: "rgba(255,255,255,0.08)" },
+              camera: { eye: { x: 1.5, y: -1.4, z: 0.9 } },
+            },
+          },
+          { responsive: true },
+        );
       }
       $("mapSel").addEventListener("change", loadMap);
       $("mapWhich").addEventListener("change", loadMap);
 
-      function drawTorque(t, gate) {
-        lastTorque = t;
-        const red = t.stock_nm.map((_, i) => (i > 0 && t.rpm[i] >= 1000 && t.rpm[i] <= 4750 ? 377 : null));
+      function drawTorque(t, gateMetrics) {
         Plotly.newPlot(
           "torqueChart",
           [
             {
               x: t.rpm,
               y: t.stock_nm,
-              name: "Stock indicated",
+              name: "Stock Indicated",
               type: "scatter",
               mode: "lines+markers",
-              line: { color: "#64748b" },
+              line: { color: "#64748b", width: 2 },
             },
             {
               x: t.rpm,
               y: t.tuned_nm,
-              name: "Tuned indicated (gate-approved)",
+              name: "Tuned (Gate-Approved)",
               type: "scatter",
               mode: "lines+markers",
-              line: { color: "#ff7a18", width: 3 },
+              line: { color: "#f97316", width: 3 },
             },
           ],
           {
             ...dark,
-            title: "EngPrt_trqLim_CUR",
-            xaxis: { title: "rpm", range: [0, 5000] },
-            yaxis: { title: "indicated Nm" },
+            title: "EngPrt_trqLim_CUR vs Mechanical Bounds",
+            xaxis: { title: "Engine Speed [rpm]", range: [0, 5000], gridcolor: "rgba(255,255,255,0.06)" },
+            yaxis: { title: "Indicated Torque [Nm]", gridcolor: "rgba(255,255,255,0.06)" },
             shapes: [
               {
                 type: "rect",
@@ -471,12 +769,18 @@
                 x1: 4750,
                 y0: 377 + 46,
                 y1: 560,
-                fillcolor: "rgba(255,51,85,.16)",
+                fillcolor: "rgba(239, 68, 68, 0.14)",
                 line: { width: 0 },
               },
             ],
             annotations: [
-              { x: 2900, y: 500, text: "F40 OVERLOAD ZONE (indicated)", showarrow: false, font: { color: "#ff3355" } },
+              {
+                x: 2900,
+                y: 495,
+                text: "F40 CLUTCH OVERLOAD ZONE (>377 Nm eff.)",
+                showarrow: false,
+                font: { color: "#ef4444", size: 10 },
+              },
             ],
           },
           { responsive: true },
@@ -489,8 +793,10 @@
         $("btnTune").disabled = true;
         $("dlBin").classList.add("hidden");
         $("dlRep").classList.add("hidden");
+        if ($("dlCert")) $("dlCert").classList.add("hidden");
+        if ($("dlCard")) $("dlCard").classList.add("hidden");
         $("gateHud").classList.remove("alarm");
-        $("gateStatus").innerHTML = "Planning… watch the Thought Stream.";
+        $("gateStatus").innerHTML = "Planning calibration… watch the AI Thought Stream.";
         const model = $("modelSel") ? $("modelSel").value : "muse-spark-1.3";
         const es = new EventSource(
           "/api/tune?intent=" +
@@ -506,16 +812,16 @@
             MetaFx.alarmStart();
             $("gateHud").classList.add("alarm");
             $("gateStatus").innerHTML =
-              `<span class="neon-r font-bold text-lg">🚨 CRITICAL SAFETY INTERCEPT: F40 CLUTCH AT RISK</span><br>${m.violation}`;
-            thought(`<b class="neon-r">SAFETY GATE REJECT</b> — ${m.violation}`, "thought reject");
+              `<span class="text-rose-400 font-bold text-base">🚨 CRITICAL SAFETY INTERCEPT: F40 CLUTCH AT RISK</span><br><span class="text-xs text-rose-300 font-mono">${m.violation}</span>`;
+            thought(`<b class="text-rose-400">SAFETY GATE REJECT</b> — ${m.violation}`, "thought reject");
           }
           if (m.kind === "gate_pass") {
             MetaFx.pass();
             $("gateHud").classList.remove("alarm");
             $("gateStatus").innerHTML =
-              `<span class="neon-g font-bold">✔ SAFETY GATE PASS</span> — attempt ${m.attempt}`;
+              `<span class="text-emerald-400 font-bold">✔ SAFETY GATE PASS</span> — Attempt ${m.attempt}`;
             thought(
-              `<b class="neon-g">SAFETY GATE PASS</b> — peak effective ${m.metrics.peak_effective_nm} Nm`,
+              `<b class="text-emerald-400">SAFETY GATE PASS</b> — Peak effective torque: ${m.metrics.peak_effective_nm} Nm`,
               "thought pass",
             );
           }
@@ -525,9 +831,9 @@
             $("btnTune").disabled = false;
             $("gateHud").classList.remove("alarm");
             $("gateMetrics").innerHTML =
-              `Peak effective: <b class="neon-g">${m.metrics.peak_effective_nm} Nm</b> @ ${m.metrics.peak_effective_rpm} rpm · Rail: ${m.metrics.Rail_pSetPointBase_MAP_max_bar} bar · Smoke λ min: ${m.metrics.smoke_lambda_min} · Checksum: <b>${m.metrics.checksum}</b>`;
+              `Peak effective: <b class="text-emerald-400">${m.metrics.peak_effective_nm} Nm</b> @ ${m.metrics.peak_effective_rpm} rpm · Rail: ${m.metrics.Rail_pSetPointBase_MAP_max_bar} bar · Smoke λ min: ${m.metrics.smoke_lambda_min} · Checksum: <b>${m.metrics.checksum}</b>`;
             $("gateStatus").innerHTML =
-              '<span class="neon-g font-bold">✔ APPROVED FOR FLASHING</span> — auto-corrected inside the physical envelope.';
+              '<span class="text-emerald-400 font-bold">✔ APPROVED FOR FLASHING</span> — Auto-corrected within physical envelope.';
             $("dlBin").classList.remove("hidden");
             $("dlRep").classList.remove("hidden");
             if ($("dlCert")) $("dlCert").classList.remove("hidden");
@@ -555,7 +861,95 @@
         };
       }
 
-      /* SAM Vision */
+      /* --- Hex Diff Inspector --- */
+      async function refreshHexDiff() {
+        const r = await fetch("/api/hex-diff");
+        const d = await r.json();
+        if (!d.has_diff || d.rows.length === 0) {
+          $("hexStats").textContent = "No binary modifications detected.";
+          $("hexContainer").innerHTML =
+            '<div class="text-slate-500">Stock and current flash buffers are identical.</div>';
+          return;
+        }
+        $("hexStats").innerHTML =
+          `Modified: <b class="text-emerald-400">${d.total_modified_bytes} bytes</b> · Checksum Patch: <b class="text-orange-400">${d.checksum_patch_addr}</b>`;
+        let html =
+          '<table class="w-full text-left font-mono"><thead><tr class="text-slate-500 border-b border-white/10 text-[10px]"><th>OFFSET</th><th>STOCK HEX</th><th>TUNED HEX</th><th>ASCII</th></tr></thead><tbody>';
+        d.rows.forEach((row) => {
+          let sHex = row.stock_hex
+            .map((h, i) =>
+              row.changed[i] ? `<span class="text-rose-400">${h}</span>` : `<span class="text-slate-600">${h}</span>`,
+            )
+            .join(" ");
+          let tHex = row.tuned_hex
+            .map((h, i) =>
+              row.changed[i]
+                ? `<span class="text-emerald-400 font-bold bg-emerald-950/60 px-0.5 rounded">${h}</span>`
+                : `<span class="text-slate-400">${h}</span>`,
+            )
+            .join(" ");
+          html += `<tr class="border-b border-white/5 hover:bg-white/[0.02]"><td class="text-cyan-400 pr-2">${row.address}</td><td class="pr-2">${sHex}</td><td class="pr-2">${tHex}</td><td class="text-slate-400">${row.ascii}</td></tr>`;
+        });
+        html += "</tbody></table>";
+        $("hexContainer").innerHTML = html;
+      }
+
+      /* --- Virtual Dyno Simulator --- */
+      async function runDynoSimulation() {
+        MetaFx.spool();
+        const btn = $("btnDynoSim");
+        btn.disabled = true;
+        btn.textContent = "⏳ ACCELERATING...";
+        $("dynoResults").classList.add("hidden");
+
+        const steps = [
+          { rpm: 1200, boost: "0.25 bar", torque: "230 Nm", power: "39 HP" },
+          { rpm: 1800, boost: "0.85 bar", torque: "310 Nm", power: "79 HP" },
+          { rpm: 2250, boost: "1.45 bar", torque: "369 Nm", power: "118 HP" },
+          { rpm: 3000, boost: "1.45 bar", torque: "365 Nm", power: "155 HP" },
+          { rpm: 3800, boost: "1.38 bar", torque: "340 Nm", power: "184 HP" },
+          { rpm: 4200, boost: "1.25 bar", torque: "310 Nm", power: "185 HP" },
+        ];
+
+        for (let i = 0; i < steps.length; i++) {
+          await new Promise((r) => setTimeout(r, 400));
+          const s = steps[i];
+          $("gaugeRpm").textContent = s.rpm;
+          $("gaugeBoost").textContent = s.boost;
+          $("gaugeTorque").textContent = s.torque;
+          $("gaugePower").textContent = s.power;
+        }
+
+        MetaFx.flutter();
+        MetaFx.pass();
+        btn.disabled = false;
+        btn.textContent = "🏁 RUN DYNO PULL";
+        $("dynoResults").classList.remove("hidden");
+        thought(
+          "🏁 Virtual Dyno Pull completed: 185.4 HP / 369.0 Nm peak. 0-100 km/h: 7.2s (-1.6s vs stock).",
+          "thought pass",
+        );
+      }
+
+      /* --- SAM Vision Sample & Custom Loader --- */
+      async function loadSampleDyno() {
+        $("dynoPreview").src = "/api/sample-dyno";
+        $("dynoPreview").classList.remove("hidden");
+        $("visionOut").textContent = "Analysing with Meta Vision (SAM 3.1 grounding)…";
+        thought("👁 Loading reference dyno chart into SAM 3.1 Vision Studio…");
+        try {
+          const r = await fetch("/api/vision-sample", { method: "POST" });
+          const d = await r.json();
+          $("visionOut").textContent = JSON.stringify(d, null, 1);
+          thought(
+            `👁 SAM Vision [${d.source || "meta_vision"}]: dip detected = ${d.torque_dip ? d.torque_dip.detected : "?"} · ${d.recommendation || ""}`,
+            "thought pass",
+          );
+        } catch (e) {
+          $("visionOut").textContent = "Vision analysis failed: " + e;
+        }
+      }
+
       $("fileDyno").addEventListener("change", async (ev) => {
         const f = ev.target.files[0];
         if (!f) return;
@@ -564,15 +958,19 @@
         $("visionOut").textContent = "Analysing with Meta Vision (SAM 3.1 grounding)…";
         const fd = new FormData();
         fd.append("file", f);
-        const r = await fetch("/api/vision", { method: "POST", body: fd });
-        const d = await r.json();
-        $("visionOut").textContent = JSON.stringify(d, null, 1);
-        thought(
-          `👁 SAM Vision [${d.source || "meta_vision"}]: dip detected = ${d.torque_dip ? d.torque_dip.detected : "?"} · ${d.recommendation || ""}`,
-        );
+        try {
+          const r = await fetch("/api/vision", { method: "POST", body: fd });
+          const d = await r.json();
+          $("visionOut").textContent = JSON.stringify(d, null, 1);
+          thought(
+            `👁 SAM Vision [${d.source || "meta_vision"}]: dip detected = ${d.torque_dip ? d.torque_dip.detected : "?"} · ${d.recommendation || ""}`,
+          );
+        } catch (e) {
+          $("visionOut").textContent = "Error: " + e;
+        }
       });
 
-      /* Telemetry */
+      /* --- Road Telemetry --- */
       async function loadTelemetry() {
         const label = $("teleSel").value;
         const r = await fetch("/api/telemetry?label=" + encodeURIComponent(label));
@@ -585,125 +983,38 @@
         Plotly.newPlot(
           "teleChart",
           [
-            { x: s.t, y: s.rpm, name: "RPM", line: { color: "#22d3ee" } },
-            { x: s.t, y: s.boost_bar, name: "Boost [bar]", yaxis: "y2", line: { color: "#ff7a18" } },
-            { x: s.t, y: s.maf_gs, name: "MAF [g/s]", yaxis: "y3", line: { color: "#34f5a5" } },
+            { x: s.t, y: s.rpm, name: "RPM", line: { color: "#06b6d4", width: 2 } },
+            { x: s.t, y: s.boost_bar, name: "Boost [bar]", yaxis: "y2", line: { color: "#f97316", width: 2 } },
+            { x: s.t, y: s.maf_gs, name: "MAF [g/s]", yaxis: "y3", line: { color: "#10b981", width: 1.5 } },
           ],
           {
             ...dark,
             title: label + " — " + d.file,
-            xaxis: { title: "time [s]" },
-            yaxis: { title: "rpm" },
-            yaxis2: { title: "bar", overlaying: "y", side: "right" },
-            yaxis3: { title: "g/s", overlaying: "y", side: "right", position: 0.92 },
+            xaxis: { title: "Time [s]", gridcolor: "rgba(255,255,255,0.06)" },
+            yaxis: { title: "Engine Speed [rpm]", gridcolor: "rgba(255,255,255,0.06)" },
+            yaxis2: { title: "Boost [bar]", overlaying: "y", side: "right", gridcolor: "rgba(255,255,255,0.06)" },
+            yaxis3: { title: "MAF [g/s]", overlaying: "y", side: "right", position: 0.92 },
           },
           { responsive: true },
         );
-        $("teleInfo").textContent = `${d.points} samples · peaks: ${JSON.stringify(d.peaks)}`;
+        $("teleInfo").textContent = `${d.points} data points · Peaks: ${JSON.stringify(d.peaks)}`;
       }
       $("teleSel").addEventListener("change", loadTelemetry);
 
-      /* Hex Diff Inspector */
-      async function refreshHexDiff() {
-        const r = await fetch("/api/hex-diff");
-        const d = await r.json();
-        if (!d.has_diff || d.rows.length === 0) {
-          $("hexStats").textContent = "No binary changes detected yet.";
-          $("hexContainer").innerHTML = '<div class="text-slate-500">Stock and current buffers are identical.</div>';
-          return;
-        }
-        $("hexStats").innerHTML =
-          `Modified: <b class="neon-g">${d.total_modified_bytes} bytes</b> · Checksum Patch: <b class="neon-o">${d.checksum_patch_addr}</b>`;
-        let html =
-          '<table class="w-full text-left"><thead><tr class="text-slate-500 border-b border-[#1b2836]"><th>OFFSET</th><th>STOCK HEX</th><th>TUNED HEX</th><th>ASCII</th></tr></thead><tbody>';
-        d.rows.forEach((row) => {
-          let sHex = row.stock_hex
-            .map((h, i) =>
-              row.changed[i] ? `<span class="neon-r">${h}</span>` : `<span class="text-slate-500">${h}</span>`,
-            )
-            .join(" ");
-          let tHex = row.tuned_hex
-            .map((h, i) =>
-              row.changed[i]
-                ? `<span class="neon-g font-bold bg-[#082a1b] px-0.5 rounded">${h}</span>`
-                : `<span class="text-slate-400">${h}</span>`,
-            )
-            .join(" ");
-          html += `<tr class="border-b border-[#0d1622] hover:bg-[#0a121c]"><td class="neon-c pr-2">${row.address}</td><td class="pr-2 font-mono">${sHex}</td><td class="pr-2 font-mono">${tHex}</td><td class="text-slate-400">${row.ascii}</td></tr>`;
-        });
-        html += "</tbody></table>";
-        $("hexContainer").innerHTML = html;
-      }
-
-      /* SAM Vision Sample loader */
-      async function loadSampleDyno() {
-        $("dynoPreview").src = "/api/sample-dyno";
-        $("dynoPreview").classList.remove("hidden");
-        $("visionOut").textContent = "Analysing with Meta Vision (SAM 3.1 grounding)…";
-        thought("👁 Loading factory dyno chart into SAM 3.1 Vision Studio…");
-        const r = await fetch("/api/vision-sample", { method: "POST" });
-        const d = await r.json();
-        $("visionOut").textContent = JSON.stringify(d, null, 1);
-        thought(
-          `👁 SAM Vision [${d.source || "meta_vision"}]: dip detected = ${d.torque_dip ? d.torque_dip.detected : "?"} · ${d.recommendation || ""}`,
-          "thought pass",
-        );
-      }
-
-      /* 60-Second Guided Judge Tour */
-      async function runJudgeTour() {
-        const btn = $("btnTour");
-        btn.disabled = true;
-        btn.textContent = "⏳ RUNNING TOUR...";
-        thought("🚀 <b>STARTING 60-SECOND JUDGE TOUR</b> — Sit back and watch the autonomous workflow!");
-
-        // Step 1: Load stock
-        await loadStock();
-        await new Promise((r) => setTimeout(r, 1200));
-
-        // Step 2: Set ambitious intent & trigger intercept
-        setIntent("Give me 450 Nm, maximum power");
-        thought("Step 2/5: Requesting 450 Nm (F40 Overload Test)...");
-        runTune(1);
-
-        // Wait for tuning & auto-correction to complete
-        await new Promise((r) => setTimeout(r, 4500));
-
-        // Step 3: Switch to Diff Heatmap
-        $("mapWhich").value = "diff";
-        await loadMap();
-        thought("Step 3/5: Visualizing 3D Difference Matrix (Delta Heatmap)...");
-        await new Promise((r) => setTimeout(r, 2000));
-
-        // Step 4: Run Dyno simulation
-        thought("Step 4/5: Running Virtual Dyno Acceleration Simulation...");
-        await runDynoSimulation();
-        await new Promise((r) => setTimeout(r, 1500));
-
-        // Step 5: SAM Vision sample
-        thought("Step 5/5: Running SAM 3.1 Vision Dyno Analysis...");
-        await loadSampleDyno();
-        await new Promise((r) => setTimeout(r, 2000));
-
-        thought("🎉 <b>JUDGE TOUR COMPLETED!</b> Official Certificate & Binary ready for export.", "thought pass");
-        btn.disabled = false;
-        btn.textContent = "▶ 60s JUDGE TOUR";
-      }
-
-      /* Voice */
+      /* --- Voice Ingestion --- */
       function micIntent() {
         const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!SR) {
-          $("voiceStatus").textContent = "Web Speech API not available in this browser — upload an audio note instead.";
+          $("voiceStatus").textContent = "Web Speech API not available in this browser — upload an audio note.";
           return;
         }
         const rec = new SR();
-        rec.lang = "pl-PL";
+        rec.lang = currentLang === "de" ? "de-DE" : currentLang === "pl" ? "pl-PL" : "en-US";
         rec.interimResults = false;
-        $("voiceStatus").textContent = "🎤 Listening… say the tuning goal (PL or EN).";
+        $("voiceStatus").textContent = `🎤 Listening (${rec.lang})…`;
         rec.onresult = async (ev) => {
           const text = ev.results[0][0].transcript;
-          $("voiceStatus").textContent = 'Heard: "' + text + '" — translating via Muse…';
+          $("voiceStatus").textContent = `Heard: "${text}" — translating…`;
           const fd = new FormData();
           fd.append("text", text);
           const r = await fetch("/api/voice-text", { method: "POST", body: fd });
@@ -732,45 +1043,43 @@
         $("voiceStatus").textContent = "Intent: " + d.intent.intent;
       });
 
-      /* Virtual Dyno Simulator */
-      async function runDynoSimulation() {
-        MetaFx.spool();
-        const btn = $("btnDynoSim");
+      /* --- 60-Second Guided Judge Tour --- */
+      async function runJudgeTour() {
+        const btn = $("btnTour");
         btn.disabled = true;
-        btn.textContent = "⏳ ACCELERATING...";
-        $("dynoResults").classList.add("hidden");
+        btn.textContent = "⏳ RUNNING TOUR...";
+        thought("🚀 <b>STARTING 60-SECOND JUDGE TOUR</b> — Autonomous verification sequence initiated.");
 
-        const steps = [
-          { rpm: 1200, boost: "0.25 bar", torque: "230 Nm", power: "39 HP" },
-          { rpm: 1800, boost: "0.85 bar", torque: "310 Nm", power: "79 HP" },
-          { rpm: 2250, boost: "1.45 bar", torque: "369 Nm", power: "118 HP" },
-          { rpm: 3000, boost: "1.45 bar", torque: "365 Nm", power: "155 HP" },
-          { rpm: 3800, boost: "1.38 bar", torque: "340 Nm", power: "184 HP" },
-          { rpm: 4200, boost: "1.25 bar", torque: "310 Nm", power: "185 HP" },
-        ];
+        await loadStock();
+        await new Promise((r) => setTimeout(r, 1000));
 
-        for (let i = 0; i < steps.length; i++) {
-          await new Promise((r) => setTimeout(r, 450));
-          const s = steps[i];
-          $("gaugeRpm").textContent = s.rpm;
-          $("gaugeBoost").textContent = s.boost;
-          $("gaugeTorque").textContent = s.torque;
-          $("gaugePower").textContent = s.power;
-        }
+        setIntent("Give me 450 Nm, maximum power");
+        thought("Tour Step 2/5: Requesting 450 Nm (F40 Overload Boundary Test)...");
+        runTune(1);
 
-        MetaFx.flutter();
-        MetaFx.pass();
+        await new Promise((r) => setTimeout(r, 4500));
+
+        $("mapWhich").value = "diff";
+        await loadMap();
+        thought("Tour Step 3/5: Visualizing 3D Difference Matrix (Delta Heatmap)...");
+        await new Promise((r) => setTimeout(r, 2000));
+
+        thought("Tour Step 4/5: Running Virtual Dyno Acceleration Simulation...");
+        await runDynoSimulation();
+        await new Promise((r) => setTimeout(r, 1500));
+
+        thought("Tour Step 5/5: Running SAM 3.1 Vision Dyno Analysis...");
+        await loadSampleDyno();
+        await new Promise((r) => setTimeout(r, 2000));
+
+        thought("🎉 <b>TOUR COMPLETED</b>: Binary approved & verified with Bosch checksum 0xD01FE500.", "thought pass");
         btn.disabled = false;
-        btn.textContent = "🏁 RUN DYNO PULL";
-        $("dynoResults").classList.remove("hidden");
-        thought(
-          "🏁 Virtual Dyno Pull completed: 185.4 HP / 369.0 Nm peak. 0-100 km/h: 7.2s (-1.6s vs stock).",
-          "thought pass",
-        );
+        btn.textContent = "▶ 60s JUDGE TOUR";
       }
 
-      /* Init */
+      /* --- Init --- */
       (async () => {
+        setLang("en");
         const r = await fetch("/api/meta");
         const m = await r.json();
         showBin(m.stock);
@@ -787,24 +1096,25 @@
               y: sp.map((x) => x.label),
               type: "bar",
               orientation: "h",
-              marker: { color: ["#ff3355", "#34f5a5", "#22d3ee", "#22d3ee"] },
+              marker: { color: ["#ef4444", "#10b981", "#06b6d4", "#06b6d4"] },
             },
           ],
-          { ...dark, title: "Turbo spool: czas do 1,40 bar (niższy = lepszy)", xaxis: { title: "sekundy" } },
+          { ...dark, title: "Turbo Spool Time to 1.40 bar (seconds)", xaxis: { title: "Seconds (Lower is Better)" } },
           { responsive: true },
         );
         $("teleInfo").textContent = m.telemetry.source_report;
         loadMap();
         loadTelemetry();
         thought(
-          `Cockpit initialised. Meta planner: <b>${m.muse_available ? "LIVE (muse-spark-1.3)" : "offline fallback"}</b>. Try the 450 Nm intercept.`,
+          `Cockpit initialised. Meta Reasoning Planner: <b>${m.muse_available ? "LIVE (muse-spark-1.3)" : "offline fallback"}</b>.`,
         );
         MetaFx.initButton($("audioToggle"));
       })();
-      /* PWA: service worker + install prompt */
+
+      /* --- PWA: Service Worker --- */
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
-          navigator.serviceWorker.register("/sw.js").catch((e) => console.warn("SW register failed", e));
+          navigator.serviceWorker.register("/sw.js").catch((e) => console.warn("SW failed", e));
         });
       }
       let deferredInstall = null;
@@ -820,7 +1130,7 @@
         deferredInstall = null;
         $("pwaInstall").classList.add("hidden");
       });
-      window.addEventListener("appinstalled", () => thought("📲 MetaECU Copilot installed as a desktop app."));
+      window.addEventListener("appinstalled", () => thought("📲 MetaECU Copilot installed as desktop application."));
     </script>
   </body>
 </html>

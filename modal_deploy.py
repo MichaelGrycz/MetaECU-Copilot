@@ -74,8 +74,9 @@ app = modal.App(APP_NAME)
     # even if the secret is absent — only live Muse reasoning needs the key.
     cpu=1.0,
     memory=1024,
-    timeout=300,
-    scaledown_window=120,
+    timeout=120,
+    max_containers=2,
+    scaledown_window=60,
 )
 @modal.asgi_app()
 def web():

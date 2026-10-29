@@ -28,13 +28,17 @@ REPORTS = (
     / "audyty_i_raporty"
 )
 LOGS = {
-    "v10 (po tuningu)": REPORTS
+    "v13 Sport Response (2026-10-26)": ROOT / "2026-10-26 18-20-34.csv",
+    "v12 Master Refinement (2026-10-24)": ROOT / "2026-10-24 12-31-54.csv",
+    "v10 Spool & Punch (po tuningu)": REPORTS
     / "telemetria_drogowa_v10"
     / "2026-10-19_18-54-36_log_obd_v10.csv",
-    "v9 (przed tuningiem)": REPORTS
+    "v9 Baseline (przed tuningiem)": REPORTS
     / "telemetria_drogowa_v9"
     / "2026-10-15_11-30-23_log_obd_v9.csv",
-    "v8": REPORTS / "telemetria_drogowa_v8" / "2026-10-14_14-25-13_log_obd_v8.csv",
+    "v8 Highway & Popcorn": REPORTS
+    / "telemetria_drogowa_v8"
+    / "2026-10-14_14-25-13_log_obd_v8.csv",
 }
 
 # Audited figures from RAPORT_TELEMETRII_V10.md (4th-gear spool test).

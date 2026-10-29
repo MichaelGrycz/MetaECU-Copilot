@@ -25,15 +25,27 @@ ASSETS = [
     "01_SAAB_9-3_1.9TID_EDC16C39/04_SKRYPTY_AUDYTOW_I_TESTOW/audyty_i_raporty/telemetria_drogowa_v10/2026-10-19_18-54-36_log_obd_v10.csv",
     "01_SAAB_9-3_1.9TID_EDC16C39/04_SKRYPTY_AUDYTOW_I_TESTOW/audyty_i_raporty/telemetria_drogowa_v9/2026-10-15_11-30-23_log_obd_v9.csv",
     "01_SAAB_9-3_1.9TID_EDC16C39/04_SKRYPTY_AUDYTOW_I_TESTOW/audyty_i_raporty/telemetria_drogowa_v8/2026-10-14_14-25-13_log_obd_v8.csv",
+    "2026-10-24 12-31-54.csv",
+    "2026-10-26 18-20-34.csv",
+    "demo_assets/output/torque_comparison.png",
 ]
 
 
 def stage(dest: Path) -> list[dict]:
     staged = []
+    # Ensure sample dyno chart exists before staging
+    sample_chart = REPO / "demo_assets" / "output" / "torque_comparison.png"
+    if not sample_chart.exists():
+        sample_chart.parent.mkdir(parents=True, exist_ok=True)
+        from demo_assets.generate_demo_assets import main as gen_demo
+
+        gen_demo()
+
     for rel in ASSETS:
         src = REPO / rel
         if not src.is_file():
-            raise FileNotFoundError(f"Required runtime asset missing: {src}")
+            print(f"Warning: asset {rel} missing, skipping.")
+            continue
         out = dest / rel
         out.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(src, out)
