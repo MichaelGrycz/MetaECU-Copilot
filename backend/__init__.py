@@ -1,0 +1,1 @@
+"""MetaECU Copilot backend package."""

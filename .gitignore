@@ -1,0 +1,57 @@
+# ==============================================================================
+# ChipTuning Master Repository - .gitignore
+# ==============================================================================
+
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyd
+
+# Operating System and Editor artifacts
+nul
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+desktop.ini
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.bak
+*.tmp
+
+# WinOLS & TunerPro cache directories
+*.dir
+
+# Large VM images, setup disks, installer archives (15+ GB)
+*.rar
+*.iso
+*.vmdk
+*.vdi
+01_SAAB_9-3_1.9TID_EDC16C39/05_ARCHIWUM_I_ZRODLA/instalki/WinOLS5_VM_extracted/
+01_SAAB_9-3_1.9TID_EDC16C39/05_ARCHIWUM_I_ZRODLA/instalki/WinOLS5_Programas_extracted/
+01_SAAB_9-3_1.9TID_EDC16C39/05_ARCHIWUM_I_ZRODLA/instalki/WinOLS_VM_files/
+01_SAAB_9-3_1.9TID_EDC16C39/05_ARCHIWUM_I_ZRODLA/instalki/_setup_temp/
+01_SAAB_9-3_1.9TID_EDC16C39/05_ARCHIWUM_I_ZRODLA/instalki/_vm_rar/
+01_SAAB_9-3_1.9TID_EDC16C39/05_ARCHIWUM_I_ZRODLA/instalki/*.exe
+01_SAAB_9-3_1.9TID_EDC16C39/05_ARCHIWUM_I_ZRODLA/instalki/*.zip
+
+# Whitelist essential CLI tools required by verification suites
+!02_AUDI_A4_1.8T_ME75/05_NARZEDZIA_I_BINARKI/ME7Check.exe
+!02_AUDI_A4_1.8T_ME75/05_NARZEDZIA_I_BINARKI/me7sum.exe
+
+# MetaECU Copilot generated artifacts
+.env
+output/*.bin
+
+# MetaECU build artifacts (regenerable: tools/stage_assets.py, build_exe.py)
+build_assets/
+assets/
+build/
+dist/
+*.spec
+__pycache__/
+.env

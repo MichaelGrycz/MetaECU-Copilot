@@ -1,0 +1,13 @@
+numpy>=1.26
+matplotlib>=3.8
+openai>=1.30
+python-dotenv>=1.0
+fastapi>=0.110
+uvicorn>=0.29
+python-multipart>=0.0.9
+Pillow>=10.0
+# Desktop window (run_desktop.py) + cloud deploy + EXE build toolchain.
+# Local cockpit (main.py / web_app.py) works without these three.
+pywebview>=5.0
+modal>=1.0
+pyinstaller>=6.0

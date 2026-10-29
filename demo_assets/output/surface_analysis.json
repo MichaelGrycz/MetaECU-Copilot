@@ -1,0 +1,8 @@
+{
+  "symbol": "EngM_trqFrc_MAP",
+  "max_gradient_x": 22.9,
+  "max_gradient_y": 5.5,
+  "relative_roughness": 0.1724,
+  "spikes_detected": 0,
+  "verdict": "SMOOTH"
+}
