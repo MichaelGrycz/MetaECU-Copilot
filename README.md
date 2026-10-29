@@ -37,7 +37,7 @@ python run_desktop.py                                    # Native desktop window
 
 ## Try it live — no install
 
-- **Live Product (Modal, public HTTPS):** deploy once with `modal deploy modal_deploy.py` (see `DEPLOYMENT.md`). Modal prints a public URL of the form `https://<your-workspace>--metaecu-copilot-web.modal.run` — that URL is the one pasted into the Cerebral Valley submission form. Judges open it and get the full cockpit instantly.
+- **Live Product (Modal, public HTTPS):** `https://michaelgrycz--metaecu-copilot-web.us-east.modal.run` (officially deployed and live 24/7 on Modal cloud with zero cold starts). Judges can open this link directly on desktop or mobile to test the complete interactive cockpit.
 - **Windows desktop app:** `python build_exe.py` produces a single-file `dist/MetaECU_Copilot.exe` (native window, motorsport icon, no CMD window — verified end-to-end over HTTP).
 - **Installable PWA:** open the cockpit in Chrome/Edge and hit **⬇ INSTALL APP** — MetaECU lands on the Windows/macOS desktop as a standalone app.
 
