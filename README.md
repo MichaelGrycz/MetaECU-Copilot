@@ -62,14 +62,14 @@ Futuristic dark motorsport cockpit (FastAPI + Tailwind + Plotly WebGL):
 
 ```mermaid
 graph TD
-    A[Stock .bin 2 MiB] --> B[Binary Core: flash_loader + 774-symbol catalogue]
-    C[Natural-language intent] --> D[Muse Spark planner - Meta Model API]
+    A["Factory Binary<br/>(2 MiB Flash Dump)"] --> B["Binary Core Engine<br/>(Flash Loader + 774 Bosch Maps)"]
+    C["Tuner Intent<br/>(Natural Language / Voice)"] --> D["Meta Muse AI Planner<br/>(Muse Spark / Wonder 1.0)"]
     B --> D
-    D --> E[Binary patcher: torque limiter reshape + smoothing]
-    E --> F{Deterministic Safety Gate}
-    F -- REJECT + violation report --> D
-    F -- PASS --> G[Checksum fix 0xD01FE500]
-    G --> H[Tuned .bin + audit_report.md + 3D chart visual grounding]
+    D --> E["Binary Calibration Patcher<br/>(Matrix Reshaping & Smoothing)"]
+    E --> F{"Deterministic<br/>Safety Gate"}
+    F -- "REJECT (Violation Report)" --> D
+    F -- "PASS (Approved Envelope)" --> G["Bosch Checksum Engine<br/>(32-bit Target 0xD01FE500)"]
+    G --> H["Verified Tuned .BIN<br/>+ Official Certificate & Report"]
 ```
 
 ## Verification
