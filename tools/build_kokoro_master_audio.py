@@ -214,9 +214,9 @@ def build_kokoro_master_audio(out_wav: Path) -> Path:
     add(whoosh(0.6, 0.22), 17.6)
 
     # Real dyno pull instead of retro blips, ducked so it never masks the voice.
-    add_ducked(diesel_pull(1290, 2190, 4.0, 0.55), 23.5)
-    add(sub_impact(2.0, 0.80), 27.5)
-    add_ducked(alarm(3.0, 0.42), 27.5)
+    add_ducked(diesel_pull(1290, 2190, 5.8, 0.55), 23.5)
+    add(sub_impact(2.0, 0.80), 29.6)
+    add_ducked(alarm(3.0, 0.42), 29.6)
     add(chime(0.62), 32.8)
     add(whoosh(0.9, 0.26), 40.8)
     add(whoosh(1.1, 0.34), 45.8)

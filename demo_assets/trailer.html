@@ -261,11 +261,6 @@
         UNLESS IT HAS DETERMINISTIC SAFETY GATES.
       </div>
     </div>
-    <div style="margin-top: 26px; font-size: 20px; line-height: 1.55; color: #94a3b8; font-family: monospace;">
-      <span style="color:#f59e0b;">PRE-EXISTING:</span> stock ECU binary + static map catalogue + road logs
-      &nbsp;·&nbsp;
-      <span style="color:#00e5ff;">BUILT AT THIS HACKATHON:</span> planner, Safety Gate, cockpit, this film
-    </div>
   </div>
 </div>
 
@@ -496,6 +491,11 @@
         <div style="font-size: 12px; color: #00e5ff; font-weight: 700; text-transform: uppercase;">Public GitHub Repository</div>
         <div style="font-size: 20px; font-family: monospace; color: #fff; margin-top: 6px;">github.com/MichaelGrycz/MetaECU-Copilot</div>
       </div>
+    </div>
+    <div style="margin-top: 28px; font-size: 18px; line-height: 1.55; color: #94a3b8; font-family: monospace;">
+      <span style="color:#f59e0b;">PRE-EXISTING:</span> stock ECU binary + static map catalogue + road logs
+      &nbsp;·&nbsp;
+      <span style="color:#00e5ff;">BUILT AT THIS HACKATHON:</span> planner, Safety Gate, cockpit, this film
     </div>
   </div>
 </div>
@@ -746,11 +746,11 @@
   }
 
   function impact(sec) {
-    const flash = sec >= 27.5 && sec <= 27.95 ? 1 - (sec - 27.5) / 0.45 : 0;
+    const flash = sec >= 29.6 && sec <= 30.05 ? 1 - (sec - 29.6) / 0.45 : 0;
     document.getElementById('vignette').style.opacity = flash.toFixed(3);
 
     let amp = 0, t0 = 0;
-    if (sec >= 27.5 && sec < 27.7) { amp = 11; t0 = 27.5; }
+    if (sec >= 29.6 && sec < 29.85) { amp = 11; t0 = 29.6; }
     else if (sec < 0.45) { amp = 7; t0 = 0; }
     const body = document.getElementById('mainBody');
     if (amp > 0) {
@@ -817,13 +817,12 @@
       const rpmText = document.getElementById('dynoRpmText');
       const trqText = document.getElementById('dynoTorqueText');
 
-      if (sec < 27.5) {
+      if (sec < 29.6) {
         banner.classList.remove('show');
-        sweep.style.stroke = '#00e5ff';
-        // Reach 2200 rpm when the narrator says "2200 RPM", then hold.
         const prog = Math.min(1, Math.max(0, (sec - 23.5) / 1.1));
         rpmText.textContent = Math.round(1000 + prog * 1200);
         trqText.textContent = (320 + prog * 118.5).toFixed(1) + ' Nm';
+        sweep.style.stroke = prog >= 1 ? '#ef4444' : '#00e5ff';
         sweep.style.strokeDashoffset = 754 - (prog * 360);
         document.getElementById('dynoDial').style.opacity = '1';
       } else {
