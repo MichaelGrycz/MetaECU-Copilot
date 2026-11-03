@@ -25,7 +25,7 @@ CUES = [
     ("sc1_hook.wav", 0.15),
     ("sc2_ingest.wav", 7.25),
     ("sc3_intent.wav", 17.80),
-    ("sc4_intercept.wav", 23.80),
+    ("sc4_intercept.wav", 24.00),
     ("sc5_pass.wav", 32.80),
     ("sc6_map3d.wav", 40.80),
     ("sc7_outro.wav", 45.80),
@@ -185,7 +185,7 @@ def build_kokoro_master_audio(out_wav: Path) -> Path:
     envelope /= max(float(envelope.max()), 1e-6)
     duck = 1.0 - 0.78 * np.clip(envelope * 6.0, 0.0, 1.0)
 
-    bed = music_bed(TOTAL_DURATION) * duck * 0.10  # ~-20 dB under speech
+    bed = music_bed(TOTAL_DURATION) * duck * 0.15  # audible pulse, still ~-18 dB under speech
 
     mix = narration + bed
 
@@ -196,6 +196,14 @@ def build_kokoro_master_audio(out_wav: Path) -> Path:
         chunk = sound[: n_total - i]
         mix[i:i + len(chunk)] += chunk * gain
 
+    def add_ducked(sound: np.ndarray, start_s: float, gain: float = 1.0) -> None:
+        """Engine/SFX must not mask the narrator: follow the same side-chain."""
+        i = int(start_s * SAMPLE_RATE)
+        if i >= n_total:
+            return
+        chunk = sound[: n_total - i]
+        mix[i:i + len(chunk)] += chunk * gain * duck[i:i + len(chunk)]
+
     add(sub_impact(1.8, 0.75), 0.0)
     add(alarm(3.2, 0.30), 0.10)
     add(sub_impact(1.4, 0.65), 7.2)
@@ -205,10 +213,10 @@ def build_kokoro_master_audio(out_wav: Path) -> Path:
     add(tech_click(0.18), 10.7)
     add(whoosh(0.6, 0.22), 17.6)
 
-    # Real dyno pull instead of retro blips.
-    add(diesel_pull(1290, 2190, 3.9, 0.50), 23.8)
+    # Real dyno pull instead of retro blips, ducked so it never masks the voice.
+    add_ducked(diesel_pull(1290, 2190, 4.0, 0.55), 23.5)
     add(sub_impact(2.0, 0.80), 27.5)
-    add(alarm(3.0, 0.40), 27.6)
+    add_ducked(alarm(3.0, 0.42), 27.5)
     add(chime(0.62), 32.8)
     add(whoosh(0.9, 0.26), 40.8)
     add(whoosh(1.1, 0.34), 45.8)

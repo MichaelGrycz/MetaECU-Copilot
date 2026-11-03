@@ -261,6 +261,11 @@
         UNLESS IT HAS DETERMINISTIC SAFETY GATES.
       </div>
     </div>
+    <div style="margin-top: 26px; font-size: 20px; line-height: 1.55; color: #94a3b8; font-family: monospace;">
+      <span style="color:#f59e0b;">PRE-EXISTING:</span> stock ECU binary + static map catalogue + road logs
+      &nbsp;·&nbsp;
+      <span style="color:#00e5ff;">BUILT AT THIS HACKATHON:</span> planner, Safety Gate, cockpit, this film
+    </div>
   </div>
 </div>
 
@@ -365,15 +370,15 @@
   <div class="pass-badge">
     <div style="font-size: 64px; color: #10b981; margin-bottom: 12px;">✓</div>
     <div style="font-size: 46px; font-weight: 900; color: #10b981; letter-spacing: 1px;" class="glow-green">
-      GATE PASS: 100% APPROVED
+      GATE PASS · APPROVED
     </div>
     <div style="font-size: 26px; color: #fff; margin-top: 18px; font-weight: 700;">
       Muse Spark Autonomously Clamped Torque to <span style="color: #10b981;">376.5 Nm</span> at the Clutch
     </div>
     <div style="display: flex; gap: 30px; justify-content: center; margin-top: 35px;">
       <div style="padding: 16px 32px; background: rgba(0,0,0,0.5); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
-        <div style="font-size: 34px; font-weight: 800; color: #10b981;">202.5 KM</div>
-        <div style="font-size: 12px; color: #94a3b8; text-transform: uppercase;">Measured Peak (33 WOT logs)</div>
+        <div style="font-size: 34px; font-weight: 800; color: #10b981;">202.5 PS</div>
+        <div style="font-size: 12px; color: #94a3b8; text-transform: uppercase;">Metric hp · 33 WOT logs</div>
       </div>
       <div style="padding: 16px 32px; background: rgba(0,0,0,0.5); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
         <div style="font-size: 34px; font-weight: 800; color: #10b981;">376.5 Nm</div>
@@ -394,12 +399,12 @@
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
       <div>
         <div style="font-size: 28px; font-weight: 800; color: #fff;">3D Calibration Map &amp; Surgical Delta Heatmap</div>
-        <div style="font-size: 14px; color: #00e5ff; font-family: monospace;">Effective clutch torque = EngPrt_trqLim_CUR − EngM_trqFrc_MAP (real maps, 90 °C)</div>
+        <div style="font-size: 14px; color: #00e5ff; font-family: monospace;">EngPrt_trqLim_CUR − EngM_trqFrc_MAP · grid 1250–5000 rpm, 39–109 °C</div>
       </div>
       <div style="display: flex; gap: 10px;">
-        <div class="hud-badge" style="background: rgba(0,229,255,0.2);">STOCK 318 Nm</div>
-        <div class="hud-badge" style="background: rgba(16,185,129,0.2); color: #10b981; border-color: #10b981;">TUNED 362 Nm</div>
-        <div class="hud-badge" style="background: rgba(245,158,11,0.2); color: #f59e0b; border-color: #f59e0b;">Δ +46 Nm</div>
+        <div class="hud-badge" style="background: rgba(0,229,255,0.2);">EFFECTIVE TORQUE GRID</div>
+        <div class="hud-badge" style="background: rgba(16,185,129,0.2); color: #10b981; border-color: #10b981;">REAL MAPS</div>
+        <div class="hud-badge" style="background: rgba(245,158,11,0.2); color: #f59e0b; border-color: #f59e0b;" id="deltaBadge">Δ +44 Nm</div>
       </div>
     </div>
     <div style="position: relative; width: 100%; height: 510px; display: flex; justify-content: center; align-items: center; overflow: hidden; border-radius: 14px; background: rgba(10, 16, 26, 0.95); border: 1px solid rgba(0, 229, 255, 0.25);">
@@ -422,7 +427,7 @@
 
   <div style="text-align: center; margin-top: 160px;">
     <div style="font-size: 38px; font-weight: 900; color: #fff;">Ghost Car Highway Drag Race (60–140 km/h in 4th Gear)</div>
-    <div style="font-size: 16px; color: #00e5ff; font-family: monospace; margin-top: 8px;">Replaying 33 Real WOT Highway Telemetry Sessions</div>
+    <div style="font-size: 16px; color: #00e5ff; font-family: monospace; margin-top: 8px;">Animation of the logged 4th-gear spool comparison · 33 real WOT sessions</div>
   </div>
 
   <div class="drag-track">
@@ -476,7 +481,7 @@
 <!-- ═══ ACT 9 (55.5s - 65.0s): HIL & FINAL GRAND PAYOFF ═══ -->
 <div class="stage" id="s9">
   <div style="text-align: center; margin-top: 140px;">
-    <div class="payoff-badge">✓ 202.5 KM · 376.5 Nm at the clutch · 0 SLIP · 1.34s SPOOL — INSIDE 377 Nm</div>
+    <div class="payoff-badge">✓ 202.5 PS · 376.5 Nm at the clutch · 0 SLIP · 1.34s SPOOL — INSIDE 377 Nm</div>
     <div style="font-size: 80px; font-weight: 900; letter-spacing: -2px;" class="glow-cyan">MetaECU Copilot</div>
     <div style="font-size: 26px; color: #94a3b8; margin-top: 10px; font-weight: 500;">
       AI Proposes. Physics Disposes.
@@ -590,7 +595,7 @@
     g.fillStyle = 'rgba(239,68,68,.9)'; g.font = 'bold 11px monospace';
     g.fillText('377.0 Nm F40 LIMIT', x1 - 150, Y(limit) - 7);
 
-    const p = Math.min(1, Math.max(0, (sec - 33.3) / 2.4));
+    const p = Math.min(1, Math.max(0, (sec - 32.5) / 2.4));
     g.strokeStyle = '#10b981'; g.lineWidth = 3;
     g.beginPath();
     const last = Math.round(p * 100);
@@ -706,10 +711,15 @@
 
     let peak = 0;
     for (let ri = 0; ri < rows; ri++) for (let ci = 0; ci < cols; ci++) peak = Math.max(peak, zAt(ri, ci));
+    const stockPeak = Math.max(...SURF.stock.flat());
+    const tunedPeak = Math.max(...SURF.tuned.flat());
+    const delta = tunedPeak - stockPeak;
+    const badge = document.getElementById('deltaBadge');
+    if (badge) badge.textContent = `Δ +${delta.toFixed(0)} Nm`;
     g.fillStyle = 'rgba(248,250,252,.95)'; g.font = 'bold 15px monospace';
-    g.fillText(`peak ${peak.toFixed(0)} Nm`, W - 176, 30);
+    g.fillText(`surface peak ${peak.toFixed(0)} Nm`, W - 230, 30);
     g.fillStyle = `rgba(16,185,129,${0.55 + 0.45 * m})`; g.font = 'bold 13px monospace';
-    g.fillText(`Δ +${(46 * m).toFixed(0)} Nm`, W - 176, 52);
+    g.fillText(`Δ +${delta.toFixed(0)} Nm  (${stockPeak}→${tunedPeak})`, W - 230, 52);
     g.fillStyle = 'rgba(0,229,255,.75)'; g.font = '12px monospace';
     g.fillText('oil temp 39→109 °C  ·  RPM 1250→5000  ·  stock → tuned', 20, H - 14);
   }
@@ -736,11 +746,11 @@
   }
 
   function impact(sec) {
-    const flash = sec >= 27.9 && sec <= 28.35 ? 1 - (sec - 27.9) / 0.45 : 0;
+    const flash = sec >= 27.5 && sec <= 27.95 ? 1 - (sec - 27.5) / 0.45 : 0;
     document.getElementById('vignette').style.opacity = flash.toFixed(3);
 
     let amp = 0, t0 = 0;
-    if (sec >= 28.0 && sec < 28.2) { amp = 11; t0 = 28.0; }
+    if (sec >= 27.5 && sec < 27.7) { amp = 11; t0 = 27.5; }
     else if (sec < 0.45) { amp = 7; t0 = 0; }
     const body = document.getElementById('mainBody');
     if (amp > 0) {
@@ -810,12 +820,15 @@
       if (sec < 27.5) {
         banner.classList.remove('show');
         sweep.style.stroke = '#00e5ff';
-        const prog = Math.min(1, Math.max(0, (sec - 23.5) / 4.0));
+        // Reach 2200 rpm when the narrator says "2200 RPM", then hold.
+        const prog = Math.min(1, Math.max(0, (sec - 23.5) / 1.1));
         rpmText.textContent = Math.round(1000 + prog * 1200);
         trqText.textContent = (320 + prog * 118.5).toFixed(1) + ' Nm';
         sweep.style.strokeDashoffset = 754 - (prog * 360);
+        document.getElementById('dynoDial').style.opacity = '1';
       } else {
         banner.classList.add('show');
+        document.getElementById('dynoDial').style.opacity = '0.08';
         rpmText.textContent = '2200';
         trqText.textContent = '438.5 Nm';
         sweep.style.stroke = '#ef4444';
@@ -839,9 +852,7 @@
       el.style.transition = 'none';
     });
     applyTimeline(sec);
-    document.getElementById('s4').style.transform = activeStageId === 's4'
-      ? `scale(${1 + 0.18 * Math.min(1, Math.max(0, (sec - 17.5) / 0.4))})`
-      : '';
+    document.getElementById('s4').style.transform = '';
     document.getAnimations().forEach(animation => {
       animation.pause();
       animation.currentTime = 0;

@@ -18,6 +18,7 @@ sys.path.insert(0, str(ROOT))
 
 ASSETS = ROOT / "demo_assets"
 HTML_PATH = ASSETS / "trailer.html"
+CAPTIONS = ASSETS / "captions.ass"
 OUT_VIDEO = ASSETS / "MetaECU_Copilot_Demo.mp4"
 TOTAL_DURATION = 56.5
 W, H = 1920, 1080
@@ -44,10 +45,12 @@ def verify_streams(path: Path) -> dict:
 
 def record_motion_graphics(soundtrack: Path, output: Path, job_dir: Path) -> list[dict]:
     """One screenshot per frame, piped with a fixed input framerate to FFmpeg."""
+    captions_rel = CAPTIONS.relative_to(ROOT).as_posix()
     command = [
         "ffmpeg", "-hide_banner", "-loglevel", "error", "-n",
         "-f", "image2pipe", "-framerate", str(FPS), "-vcodec", "png", "-i", "pipe:0",
         "-i", str(soundtrack), "-map", "0:v:0", "-map", "1:a:0",
+        "-vf", f"ass={captions_rel}",
         "-t", str(TOTAL_DURATION), "-c:v", "libx264", "-pix_fmt", "yuv420p",
         "-preset", "medium", "-crf", "18", "-c:a", "aac", "-b:a", "192k",
         "-ar", "48000", "-movflags", "+faststart", str(output)
@@ -63,7 +66,7 @@ def record_motion_graphics(soundtrack: Path, output: Path, job_dir: Path) -> lis
         page.goto(HTML_PATH.resolve().as_uri())
         page.evaluate("document.fonts.ready")
         page.evaluate("Promise.all(Array.from(document.images, img => img.decode()))")
-        process = subprocess.Popen(command, stdin=subprocess.PIPE, stderr=log)
+        process = subprocess.Popen(command, stdin=subprocess.PIPE, stderr=log, cwd=str(ROOT))
         try:
             for frame in range(round(TOTAL_DURATION * FPS)):
                 seconds = frame / FPS
@@ -118,6 +121,7 @@ def verify_encoded_frames(output: Path, checkpoints: list[dict], job_dir: Path) 
 
 def render_cinema_video(regenerate_voiceover: bool = False) -> Path:
     from tools.build_kokoro_master_audio import VO_DIR, build_kokoro_master_audio
+    from tools.build_captions import build_captions
 
     # Preserve the exact approved voice unless regeneration is explicitly requested.
     required = ("sc1_hook", "sc2_ingest", "sc3_intent", "sc4_intercept", "sc5_pass", "sc6_map3d", "sc7_outro")
@@ -128,6 +132,7 @@ def render_cinema_video(regenerate_voiceover: bool = False) -> Path:
     job_dir = ASSETS / "_mg_tmp" / stamp
     job_dir.mkdir(parents=True)
     soundtrack = build_kokoro_master_audio(job_dir / "master_audio.wav")
+    build_captions()
     output = job_dir / OUT_VIDEO.name
     checkpoints = record_motion_graphics(soundtrack, output, job_dir)
     report = verify_streams(output)

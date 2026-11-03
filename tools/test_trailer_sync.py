@@ -49,12 +49,12 @@ class TrailerSyncTests(unittest.TestCase):
 
     def test_scene_boundaries_and_complete_narration(self):
         from scipy.io import wavfile
-        starts = (0.15, 7.25, 17.8, 23.8, 32.8, 40.8, 45.8)
-        names = ("hook", "ingest", "intent", "intercept", "pass", "map3d", "outro")
+        from tools.build_kokoro_master_audio import CUES
+
         end = 0
-        for i, (start, name) in enumerate(zip(starts, names), 1):
-            rate, data = wavfile.read(ROOT / "demo_assets" / "_kokoro_vo" / f"sc{i}_{name}.wav")
-            self.assertGreaterEqual(start, end)
+        for i, (name, start) in enumerate(CUES, 1):
+            rate, data = wavfile.read(ROOT / "demo_assets" / "_kokoro_vo" / name)
+            self.assertGreaterEqual(start, end, f"{name} overlaps the previous cue")
             end = start + len(data) / rate
         self.assertLess(end, TOTAL_DURATION)
         with sync_playwright() as pw:

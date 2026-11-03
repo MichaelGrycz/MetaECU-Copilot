@@ -10,12 +10,12 @@ OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 scenes = [
     ("sc1_hook.wav", "What happens when AI blindly tunes an engine? It shatters the clutch. Unless... it has deterministic safety gates.", 1.15),
-    ("sc2_ingest.wav", "Meet Meta E-C-U Copilot. We ingest the stock two-megabyte Bosch E-D-C-16-C-39 flash, mapping all seven hundred seventy-four calibration tables.", 1.15),
-    ("sc3_intent.wav", "The tuner asks for four hundred fifty Newton meters. Meta Muse Spark plans the fuel curve.", 1.15),
+    ("sc2_ingest.wav", "Meet Meta E-C-U Copilot. We ingest the stock two mebibyte Bosch E-D-C-16-C-39 flash, mapping all seven hundred seventy-four calibration tables.", 1.15),
+    ("sc3_intent.wav", "The tuner asks for four hundred fifty Newton meters. Meta Muse Spark plans the torque limiter curve.", 1.15),
     ("sc4_intercept.wav", "At twenty-two hundred R-P-M, the safety gate detects clutch shear breakaway on the G-M F-40 gearbox—and halts execution instantly.", 1.15),
-    ("sc5_pass.wav", "Muse Spark clamps the plan to three hundred seventy-six Newton meters at the clutch. Attempt two passes with zero slip.", 1.15),
-    ("sc6_map3d.wav", "Visual grounding inspects the surgical 3D common-rail pressure matrix.", 1.15),
-    ("sc7_outro.wav", "Replaying thirty-three real road logs: instant spool wins by three and a half seconds. Two hundred two metric horsepower, zero clutch slip, one hundred percent safe.", 1.15),
+    ("sc5_pass.wav", "Muse Spark clamps the plan to three hundred seventy-six point five Newton meters at the clutch. Attempt two passes with zero slip.", 1.15),
+    ("sc6_map3d.wav", "Visual grounding inspects the effective clutch torque surface.", 1.15),
+    ("sc7_outro.wav", "Replaying thirty-three real road logs: instant spool wins by three and a half seconds. Two hundred two point five metric horsepower, zero slip, within the F-40 limit.", 1.15),
 ]
 
 
