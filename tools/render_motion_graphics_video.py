@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-MetaECU Copilot — Cinema Motion Graphics Video Renderer.
+MetaECU Copilot — Cinema Motion Graphics Video Renderer (Real-Time 47s).
 
 Drives the high-budget HTML5/CSS3/Canvas motion graphics engine (demo_assets/trailer.html)
-in Playwright Chromium 1080p, records the dynamic motion graphics, and multiplexes
-it with the warm ambient cinematic soundtrack.
+in Playwright Chromium 1080p, records the dynamic motion graphics (47s), and multiplexes
+it with the studio voiceover + tactile sound effects soundtrack.
 """
 
 from __future__ import annotations
@@ -27,7 +27,7 @@ OUT_VIDEO = ASSETS / "MetaECU_Copilot_Demo.mp4"
 TMP_DIR = ASSETS / "_mg_tmp"
 TMP_DIR.mkdir(parents=True, exist_ok=True)
 
-TOTAL_DURATION = 75.0  # 1 minute 15 seconds
+TOTAL_DURATION = 47.0  # Exactly 47.0 seconds of pure adrenaline
 W, H = 1920, 1080
 FPS = 30
 
@@ -40,7 +40,14 @@ def record_motion_graphics() -> Path:
 
     print(f"Launching Playwright Chromium for Cinema Motion Graphics ({TOTAL_DURATION}s)...")
     with sync_playwright() as pw:
-        browser = pw.chromium.launch(headless=True)
+        browser = pw.chromium.launch(
+            headless=True,
+            args=[
+                "--disable-background-timer-throttling",
+                "--disable-backgrounding-occluded-windows",
+                "--disable-renderer-backgrounding"
+            ]
+        )
         context = browser.new_context(
             record_video_dir=str(raw_dir),
             record_video_size={"width": W, "height": H},
@@ -52,18 +59,17 @@ def record_motion_graphics() -> Path:
         print(f"Navigating to {file_url}...")
         page.goto(file_url)
         
-        # Step through time explicitly so Chromium renders every single frame
-        print(f"Recording live motion graphics animation (0.0s -> {TOTAL_DURATION}s)...")
-        step_s = 0.05  # 20 ticks per second for smooth motion
-        total_steps = int(TOTAL_DURATION / step_s)
-        for i in range(total_steps):
-            t = round(i * step_s, 2)
-            page.evaluate(f"window.setTime({t})")
-            page.wait_for_timeout(50)
-            if i % 20 == 0:
-                print(f"  [Progress] {t:.1f}s / {TOTAL_DURATION:.1f}s", end="\r", flush=True)
-            
-        print("\nMotion graphics capture complete! Finalizing video stream...")
+        print("Triggering synchronized real-time 60fps animation...")
+        page.evaluate("window.startAnimation()")
+        
+        # Real-time wall-clock sync
+        start_t = time.time()
+        while time.time() - start_t < TOTAL_DURATION + 0.8:
+            time.sleep(0.5)
+            elapsed = time.time() - start_t
+            print(f"  [Progress] {elapsed:.1f}s / {TOTAL_DURATION:.1f}s", end="\r", flush=True)
+
+        print(f"\nMotion graphics capture complete ({TOTAL_DURATION}s)! Finalizing video stream...")
         context.close()
         browser.close()
 
@@ -76,10 +82,13 @@ def record_motion_graphics() -> Path:
 
 
 def render_cinema_video():
-    # 1. Synthesize clean transition SFX (sound ONLY on element entrances and transitions)
-    from tools.build_transition_sfx_only import build_sfx_audio
-    soundtrack_wav = TMP_DIR / "transition_sfx.wav"
-    build_sfx_audio(soundtrack_wav, TOTAL_DURATION)
+    # 1. Generate Voiceover & Master Audio
+    from tools.generate_voiceover import generate_voiceover_files
+    from tools.build_trailer_master_audio import build_master_audio
+    generate_voiceover_files()
+    
+    soundtrack_wav = TMP_DIR / "master_audio.wav"
+    build_master_audio(soundtrack_wav)
     
     # 2. Capture dynamic motion graphics
     raw_webm = record_motion_graphics()
