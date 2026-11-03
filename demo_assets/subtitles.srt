@@ -1,71 +1,67 @@
 1
-00:00:00,000 --> 00:00:04,000
-Every AI tuning tool today is a chatbot guessing numbers. MetaECU Copilot is completely different.
+00:00:00,000 --> 00:00:03,500
+MetaECU Copilot: The first autonomous calibration engine with deterministic physics gates.
 
 2
-00:00:04,000 --> 00:00:09,000
-Pre-existing was our raw binary and catalogue; built entirely this week is our autonomous, verifiable calibration engine.
+00:00:03,500 --> 00:00:09,000
+Pre-existing: raw binary dump & catalog. Built this week: autonomous reasoning & safety gate.
 
 3
-00:00:09,000 --> 00:00:14,000
-We ingest the real stock flash of a Bosch EDC16C39 with 774 defined maps, axes, and physical units.
+00:00:09,000 --> 00:00:15,000
+We ingest the stock 2 MiB flash of a Bosch EDC16C39 with 774 defined Bosch maps.
 
 4
-00:00:14,000 --> 00:00:19,000
-The tuner sets their goal in natural language: 'Give me 450 Nm, maximum power' — an aggressive boundary test.
+00:00:15,000 --> 00:00:20,500
+The tuner specifies their goal: "Give me 450 Nm, maximum power" — an aggressive boundary test.
 
 5
-00:00:19,000 --> 00:00:24,000
-Meta Muse Spark plans the calibration as structured JSON, vectoring indicated torque across 774 symbols.
+00:00:20,500 --> 00:00:26,500
+Meta Muse Spark plans the calibration vector across 774 symbols in real-time.
 
 6
-00:00:24,000 --> 00:00:30,000
-We spin up the Virtual Dyno Cell. The engine revs and boost builds toward 2200 RPM...
+00:00:26,500 --> 00:00:33,000
+CRITICAL SAFETY INTERCEPT! The deterministic gate detects clutch shear breakaway on the GM F40!
 
 7
-00:00:30,000 --> 00:00:37,000
-CRITICAL SAFETY INTERCEPT! The deterministic gate detects clutch shear breakaway on the GM F40 transmission!
+00:00:33,000 --> 00:00:39,000
+Indicated torque of 450 Nm minus friction @ 90°C exceeds the 377 Nm physical clutch clamping limit.
 
 8
-00:00:37,000 --> 00:00:43,000
-A human tuner or naive LLM would slip the clutch and destroy the dual-mass flywheel. MetaECU halts it.
+00:00:39,000 --> 00:00:46,000
+Violation report feeds back into Muse Spark. The AI autonomously replans, clamping torque to 369 Nm.
 
 9
-00:00:43,000 --> 00:00:49,000
-The violation report feeds back into our self-correction loop. Muse autonomously replans inside the safe envelope.
+00:00:46,000 --> 00:00:52,500
+Attempt two passes! 185.4 horsepower, 369 Nm effective torque, and zero clutch slip.
 
 10
-00:00:49,000 --> 00:00:55,000
-Attempt two passes! 369 Nm effective torque, 1600 bar rail pressure, zero slip, and 185.4 horsepower.
+00:00:52,500 --> 00:00:59,500
+In the 3D Map Studio, we inspect the exact surgical delta applied to the calibration tables.
 
 11
-00:00:55,000 --> 00:01:01,000
-In the 3D Map Studio, visual grounding inspects the exact surgical delta applied to the calibration tables.
+00:00:59,500 --> 00:01:05,000
+The Hex Diff Inspector confirms binary alignment and modified Motorola MPC562 memory bytes.
 
 12
-00:01:01,000 --> 00:01:08,000
-Our Ghost Car simulator replays 33 real highway sessions: stock turbo lag took 4.90s; MetaECU hits 1.55 bar in 1.34s!
+00:01:05,000 --> 00:01:13,000
+Maha LPS 3000 Dyno Cell: Replaying real OBD-II logs — spool lag drops from 4.90s to 1.34s!
 
 13
-00:01:08,000 --> 00:01:15,000
-SAM 3.1 Vision Studio analyzes dyno graphs, grounds torque valleys, and optimizes turbo geometry.
+00:01:13,000 --> 00:01:21,500
+SAM 3.1 Vision Studio analyzes dyno graphs, segments torque valleys, and optimizes VNT geometry.
 
 14
-00:01:15,000 --> 00:01:22,000
-To flash the hardware, our HIL flasher executes genuine KWP2000 diagnostic protocols over CAN 500 kbps.
+00:01:21,500 --> 00:01:30,000
+To flash hardware, our HIL flasher executes genuine KWP2000 diagnostic protocols over CAN 500 kbps.
 
 15
-00:01:22,000 --> 00:01:29,000
-The binary is sealed with a verified 32-bit Bosch checksum — 0xD01FE500 — ready for immediate vehicle flashing.
+00:01:30,000 --> 00:01:36,500
+The binary is sealed with a verified 32-bit Bosch checksum — 0xD01FE500 — ready for physical flashing.
 
 16
-00:01:29,000 --> 00:01:35,000
-Every calibration ships with an Official Certificate of Safe Calibration and motorsport spec card.
+00:01:36,500 --> 00:01:42,000
+Every tune ships with an Official Certificate of Safe Calibration and motorsport spec card.
 
 17
-00:01:35,000 --> 00:01:42,000
-Deployable 24/7 on Modal serverless cloud, as a native zero-console desktop app, or headless CLI.
-
-18
-00:01:42,000 --> 00:01:50,000
-AI that proposes. Physics that disposes. MetaECU Copilot. Try the live demo at our Modal cloud link!
+00:01:42,000 --> 00:01:49,000
+AI that proposes. Physics that disposes. Try the live product at our Modal cloud link!
