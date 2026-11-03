@@ -52,13 +52,16 @@ def record_motion_graphics() -> Path:
         print(f"Navigating to {file_url}...")
         page.goto(file_url)
         
-        # Let the real-time animation play for exactly TOTAL_DURATION seconds
+        # Step through time explicitly so Chromium renders every single frame
         print(f"Recording live motion graphics animation (0.0s -> {TOTAL_DURATION}s)...")
-        start_time = time.time()
-        while time.time() - start_time < TOTAL_DURATION + 1.0:
-            time.sleep(0.5)
-            elapsed = time.time() - start_time
-            print(f"  [Progress] {elapsed:.1f}s / {TOTAL_DURATION}s", end="\r", flush=True)
+        step_s = 0.05  # 20 ticks per second for smooth motion
+        total_steps = int(TOTAL_DURATION / step_s)
+        for i in range(total_steps):
+            t = round(i * step_s, 2)
+            page.evaluate(f"window.setTime({t})")
+            page.wait_for_timeout(50)
+            if i % 20 == 0:
+                print(f"  [Progress] {t:.1f}s / {TOTAL_DURATION:.1f}s", end="\r", flush=True)
             
         print("\nMotion graphics capture complete! Finalizing video stream...")
         context.close()

@@ -504,53 +504,10 @@
   }
   drawBg();
 
-  /* ═══ 3D Surface Mesh Wireframe (Canvas) ═══ */
-  const mCanvas = document.getElementById('meshCanvas');
-  const mCtx = mCanvas.getContext('2d');
-  let angle = 0;
-  function drawMesh() {
-    mCtx.clearRect(0, 0, 1220, 480);
-    angle += 0.015;
-    const cols = 20, rows = 14;
-    const pts = [];
-    for (let r = 0; r < rows; r++) {
-      pts[r] = [];
-      for (let c = 0; c < cols; c++) {
-        const u = (c / cols - 0.5) * 800;
-        const v = (r / rows - 0.5) * 500;
-        const h = Math.sin(c * 0.4 + angle) * Math.cos(r * 0.4 + angle * 0.7) * 70;
-        // 3D rotation
-        const cosA = Math.cos(0.4), sinA = Math.sin(0.4);
-        const yRot = v * cosA - h * sinA;
-        const zRot = v * sinA + h * cosA + 600;
-        const fov = 750 / zRot;
-        pts[r][c] = { x: 610 + u * fov, y: 240 + yRot * fov, h };
-      }
-    }
-    // Draw grid
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        if (c + 1 < cols) {
-          mCtx.strokeStyle = pts[r][c].h > 20 ? 'rgba(245, 158, 11, 0.7)' : 'rgba(0, 229, 255, 0.4)';
-          mCtx.beginPath();
-          mCtx.moveTo(pts[r][c].x, pts[r][c].y);
-          mCtx.lineTo(pts[r][c+1].x, pts[r][c+1].y);
-          mCtx.stroke();
-        }
-        if (r + 1 < rows) {
-          mCtx.strokeStyle = 'rgba(0, 229, 255, 0.25)';
-          mCtx.beginPath();
-          mCtx.moveTo(pts[r][c].x, pts[r][c].y);
-          mCtx.lineTo(pts[r+1][c].x, pts[r+1][c].y);
-          mCtx.stroke();
-        }
-      }
-    }
-    requestAnimationFrame(drawMesh);
-  }
-  drawMesh();
-
   /* ═══ MASTER TIMELINE CONTROLLER (0.0s to 75.0s) ═══ */
+  var currentTime = 0;
+  var activeStageId = 's1';
+
   const timeline = [
     { t: 0.0, stage: 's1', status: 'INIT', sub: 'Every AI tuning tool today is a chatbot guessing numbers. MetaECU Copilot is completely different.' },
     { t: 4.0, stage: 's1', status: 'COMPLIANCE', sub: 'Pre-existing: raw binary dump & catalog. Built this week: autonomous reasoning & safety gate.' },
@@ -569,10 +526,7 @@
     { t: 70.0, stage: 's9', status: 'OUTRO', sub: 'AI that proposes. Physics that disposes. MetaECU Copilot. Try live at our Modal cloud link!' },
   ];
 
-  let currentTime = 0;
-  let activeStageId = 's1';
-
-  function setTime(sec) {
+  function applyTimeline(sec) {
     currentTime = sec;
     
     // Find matching milestone
@@ -660,15 +614,20 @@
   }
 
   // Expose setTime for deterministic recording
-  window.setTime = setTime;
+  window.isManual = false;
+  window.setTime = function(sec) {
+    window.isManual = true;
+    applyTimeline(sec);
+  };
 
   // Auto-play preview if opened in browser
   let startT = null;
   function runLoop(ts) {
+    if (window.isManual) return;
     if (!startT) startT = ts;
     const elapsed = (ts - startT) / 1000;
     if (elapsed <= 75.0) {
-      setTime(elapsed);
+      applyTimeline(elapsed);
       requestAnimationFrame(runLoop);
     }
   }
