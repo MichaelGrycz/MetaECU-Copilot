@@ -55,3 +55,8 @@ dist/
 *.spec
 __pycache__/
 .env
+
+# Visual audit screenshots (regenerable via tools/visual_audit.py)
+output/visual_audit/
+demo_assets/_*
+

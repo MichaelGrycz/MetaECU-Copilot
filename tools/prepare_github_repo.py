@@ -14,10 +14,20 @@ from __future__ import annotations
 
 import os
 import shutil
+import stat
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPORT_DIR = ROOT / "dist" / "MetaECU-Copilot"
+
+
+def _handle_remove_readonly(func, path, excinfo):
+    try:
+        os.chmod(path, stat.S_IWRITE)
+        func(path)
+    except Exception:
+        pass
+
 
 # Exact files and directories built for the hackathon
 INCLUDED = [
@@ -42,7 +52,7 @@ INCLUDED = [
 def prepare_repo():
     print(f"Preparing pristine GitHub repository in: {EXPORT_DIR}")
     if EXPORT_DIR.exists():
-        shutil.rmtree(EXPORT_DIR)
+        shutil.rmtree(EXPORT_DIR, onexc=_handle_remove_readonly)
     EXPORT_DIR.mkdir(parents=True, exist_ok=True)
 
     for item in INCLUDED:
@@ -62,6 +72,28 @@ def prepare_repo():
         else:
             shutil.copy2(src, dst)
         print(f"  + Included: {item}")
+
+    # Streamline README.md for hackathon submission (strip legacy multi-vehicle archives)
+    readme_dst = EXPORT_DIR / "README.md"
+    if readme_dst.exists():
+        txt = readme_dst.read_text(encoding="utf-8")
+        if "> The multi-vehicle repository overview" in txt:
+            clean_txt = txt.split("> The multi-vehicle repository overview")[0].strip()
+            clean_txt += """
+
+---
+
+## 🏆 Hackathon Submission Metadata
+
+- **Event:** Meta Global AI Developer Hackathon (Oct 26 – Nov 4, 2026)
+- **Track:** Indie Developer
+- **Theme:** Build for Your World & Push the Frontier
+- **Author:** Michał Grycz (Solo Builder)
+- **Live Product URL:** https://michaelgrycz--metaecu-copilot-web.us-east.modal.run
+- **Repository:** https://github.com/MichaelGrycz/MetaECU-Copilot
+- **License:** MIT License (Open Source)
+"""
+            readme_dst.write_text(clean_txt, encoding="utf-8")
 
     # Ensure .env is never copied
     env_file = EXPORT_DIR / ".env"

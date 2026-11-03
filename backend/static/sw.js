@@ -2,7 +2,7 @@
    Strategy: navigations are network-first (the cockpit HTML must always be
    fresh during the hackathon demo), static icons are cache-first, and all
    /api/* traffic is network-only — calibration data is never cached. */
-const CACHE = "metaecu-cockpit-v1";
+const CACHE = "metaecu-cockpit-v4";
 const PRECACHE = ["/", "/manifest.json", "/icon-192.png", "/icon-512.png", "/apple-touch-icon.png"];
 
 self.addEventListener("install", (event) => {
@@ -18,9 +18,7 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((keys) =>
-        Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))),
-      )
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim()),
   );
 });

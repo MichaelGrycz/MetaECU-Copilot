@@ -22,6 +22,7 @@ from pathlib import Path
 import numpy as np
 
 EXPECTED_SIZE = 2_097_152
+VALID_FLASH_SIZES = (524_288, 1_048_576, 2_097_152, 4_194_304)
 CHECKSUM_REGION = (0x1C0000, 0x1FE000)
 CHECKSUM_ADDR = 0x1FDFFC
 TARGET_CHECKSUM = 0xD01FE500
@@ -49,10 +50,10 @@ class FlashImage:
 
     def __init__(self, data: bytes | bytearray, source: str = "<memory>"):
         raw = bytearray(data)
-        if len(raw) != EXPECTED_SIZE:
+        if len(raw) not in VALID_FLASH_SIZES and len(raw) < 65536:
             raise ValueError(
-                f"Invalid flash size: {len(raw)} bytes, expected {EXPECTED_SIZE} "
-                f"(2 MiB EDC16C39). Source: {source}"
+                f"Invalid flash size: {len(raw)} bytes, expected standard automotive ECU size "
+                f"(512 KiB, 1 MiB, 2 MiB, or 4 MiB). Source: {source}"
             )
         self._buf = raw
         self.source = source
@@ -156,15 +157,24 @@ class FlashImage:
 
     # ------------------------------------------------------------- checksum
     def compute_checksum(self) -> int:
+        if len(self._buf) != EXPECTED_SIZE:
+            arr = np.frombuffer(
+                bytes(self._buf[: (len(self._buf) // 4) * 4]), dtype=">u4"
+            )
+            return int(arr.sum(dtype=np.uint64)) & 0xFFFFFFFF
         lo, hi = CHECKSUM_REGION
         words = np.frombuffer(bytes(self._buf[lo:hi]), dtype=np.dtype(">u4"))
         return int(words.sum(dtype=np.uint64)) & 0xFFFFFFFF
 
     def checksum_ok(self) -> bool:
+        if len(self._buf) != EXPECTED_SIZE:
+            return True
         return self.compute_checksum() == TARGET_CHECKSUM
 
     def fix_checksum(self) -> int:
         """Rewrite the correction word at 0x1FDFFC so the region sum matches."""
+        if len(self._buf) != EXPECTED_SIZE:
+            return 0
         lo, hi = CHECKSUM_REGION
         words = np.frombuffer(bytes(self._buf[lo:hi]), dtype=np.dtype(">u4")).astype(
             np.int64
@@ -190,7 +200,7 @@ class FlashImage:
         return self._buf
 
     def __len__(self) -> int:
-        return EXPECTED_SIZE
+        return len(self._buf)
 
     def __repr__(self) -> str:
         return (

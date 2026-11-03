@@ -114,7 +114,7 @@ def _smoke() -> int:
         print(f"  [{'PASS' if v == 200 else 'FAIL'}] {k} -> {v}")
     meta = client.get("/api/meta").json()
     print(f"  stock checksum: {meta['stock']['checksum']} (expect 0xD01FE500)")
-    tele = client.get("/api/telemetry", params={"label": "v10 (po tuningu)"}).json()
+    tele = client.get("/api/telemetry", params={"label": "v10 Spool & Punch (po tuningu)"}).json()
     print(f"  telemetry v10 points: {tele.get('points')} (expect 900)")
     if failed or meta["stock"]["checksum"] != "0xD01FE500" or tele.get("points") != 900:
         print("SMOKE FAILED")

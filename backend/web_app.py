@@ -206,6 +206,20 @@ def get_map(symbol: str, which: str = "stock"):
         return JSONResponse({"error": str(exc)}, status_code=404)
 
 
+@app.post("/api/scan-maps")
+def scan_maps():
+    flash = STATE["stock"] or load_flash(STOCK_BIN)
+    from backend.binary_core.zero_damos_scanner import scan_binary_for_maps
+
+    candidates = scan_binary_for_maps(flash.raw)
+    return {
+        "status": "ok",
+        "total_discovered": len(candidates),
+        "scanner": "Meta Muse Zero-DAMOS Neural Engine",
+        "maps": candidates,
+    }
+
+
 @app.get("/api/dyno-simulation")
 def dyno_simulation():
     tuned = STATE["tuned"] is not None
@@ -513,7 +527,7 @@ async def vision(request: Request, file: UploadFile = File(...)):
 
 
 @app.get("/api/telemetry")
-def telemetry(label: str = "v10 (po tuningu)"):
+def telemetry(label: str = "v10 Spool & Punch (po tuningu)"):
     return telemetry_cockpit.load_series(label)
 
 
