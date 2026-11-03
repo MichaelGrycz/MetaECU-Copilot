@@ -76,10 +76,10 @@ def record_motion_graphics() -> Path:
 
 
 def render_cinema_video():
-    # 1. Synthesize warm ambient soundtrack
-    from tools.test_warm_audio import build_warm_audio
-    soundtrack_wav = TMP_DIR / "warm_soundtrack.wav"
-    build_warm_audio(soundtrack_wav, TOTAL_DURATION)
+    # 1. Synthesize clean transition SFX (sound ONLY on element entrances and transitions)
+    from tools.build_transition_sfx_only import build_sfx_audio
+    soundtrack_wav = TMP_DIR / "transition_sfx.wav"
+    build_sfx_audio(soundtrack_wav, TOTAL_DURATION)
     
     # 2. Capture dynamic motion graphics
     raw_webm = record_motion_graphics()
