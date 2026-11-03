@@ -5,6 +5,10 @@
 ![Python](https://img.shields.io/badge/Python-3.12-green)
 ![Safety Gate](https://img.shields.io/badge/Safety%20Gate-deterministic-red)
 
+> ### 🚀 LIVE PRODUCT (1-CLICK INTERACTIVE DEMO):
+> **[https://michaelgrycz--metaecu-copilot-web.us-east.modal.run](https://michaelgrycz--metaecu-copilot-web.us-east.modal.run)**  
+> *(Judges: Open the link and click **`▶ RUN 60s JUDGE TOUR`** in the header to observe the live autonomous calibration, acoustic engine sweep, and deterministic safety intercept in real-time!)*
+
 **AI proposes. Physics disposes.** MetaECU Copilot reads the real 2 MiB flash of a
 Bosch EDC16C39 (Saab 9-3 1.9 TiD), lets Meta Muse plan a calibration from the
 774-symbol Bosch catalogue, patches the binary — and then subjects every plan to a
