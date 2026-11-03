@@ -13,9 +13,9 @@ scenes = [
     ("sc2_ingest.wav", "Meet Meta E-C-U Copilot. We ingest the stock two-megabyte Bosch E-D-C-16-C-39 flash, mapping all seven hundred seventy-four calibration tables.", 1.15),
     ("sc3_intent.wav", "The tuner asks for four hundred fifty Newton meters. Meta Muse Spark plans the fuel curve.", 1.15),
     ("sc4_intercept.wav", "At twenty-two hundred R-P-M, the safety gate detects clutch shear breakaway on the G-M F-40 gearbox—and halts execution instantly.", 1.15),
-    ("sc5_pass.wav", "Muse Spark autonomously clamps torque to a safe three hundred sixty-nine Newton meters. Attempt two passes with zero clutch slip.", 1.15),
+    ("sc5_pass.wav", "Muse Spark clamps the plan to three hundred seventy-six Newton meters at the clutch. Attempt two passes with zero slip.", 1.15),
     ("sc6_map3d.wav", "Visual grounding inspects the surgical 3D common-rail pressure matrix.", 1.15),
-    ("sc7_outro.wav", "Replaying thirty-three real road logs: instant spool wins by three and a half seconds. One hundred eighty-five horsepower, zero slip, one hundred percent safe.", 1.15),
+    ("sc7_outro.wav", "Replaying thirty-three real road logs: instant spool wins by three and a half seconds. Two hundred two metric horsepower, zero clutch slip, one hundred percent safe.", 1.15),
 ]
 
 

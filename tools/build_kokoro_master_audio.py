@@ -1,21 +1,17 @@
 #!/usr/bin/env python3
 """
-MetaECU Copilot — Kokoro-82M Master Audio Track Builder (56.5s).
+MetaECU Copilot — Master audio: Kokoro narration + dark synth bed + tactile SFX.
 
-Mixes Kokoro-82M neural studio narration (am_adam) with tactile SFX:
-  - 0.0s - 7.0s:  Hook (vo_01_hook) + Disaster Alarm & Sub-impact
-  - 7.2s - 9.5s:  Title (vo_02_intro part 1) + Title Whoosh
-  - 9.8s - 17.3s: Ingest (vo_02_intro part 2) + Data Crunches
-  - 17.8s - 23.4s: Intent (vo_03_intent) + Zoom-in Click
-  - 23.8s - 32.2s: Dyno & Intercept (vo_04_intercept) + Dyno Rev + Warning Alarm
-  - 32.8s - 40.3s: Gate Pass (vo_05_pass) + Confirmation Chime
-  - 40.8s - 45.4s: 3D Map Studio (vo_06_map3d) + Holographic Sweep
-  - 45.8s - 54.9s: Ghost Car & Payoff (vo_07_outro) + Drag Launch & Final Sub-Boom
+A continuous 100 BPM dark-synth pulse runs under the whole trailer and is
+side-chain ducked by the narration envelope, so speech never fights the music.
+The dyno section is a real diesel ramp (firing frequency = RPM / 30) with a
+turbo spool whistle, not retro blips.
 """
 
 from __future__ import annotations
 
 from pathlib import Path
+
 import numpy as np
 from scipy.io import wavfile
 from scipy.signal import butter, lfilter, resample
@@ -25,180 +21,211 @@ VO_DIR = ROOT / "demo_assets" / "_kokoro_vo"
 SAMPLE_RATE = 48000
 TOTAL_DURATION = 56.5
 
+CUES = [
+    ("sc1_hook.wav", 0.15),
+    ("sc2_ingest.wav", 7.25),
+    ("sc3_intent.wav", 17.80),
+    ("sc4_intercept.wav", 23.80),
+    ("sc5_pass.wav", 32.80),
+    ("sc6_map3d.wav", 40.80),
+    ("sc7_outro.wav", 45.80),
+]
 
-def butter_lowpass_filter(data: np.ndarray, cutoff: float, fs: int = SAMPLE_RATE, order: int = 4) -> np.ndarray:
-    nyq = 0.5 * fs
-    normal_cutoff = min(cutoff / nyq, 0.95)
-    b, a = butter(order, normal_cutoff, btype='low', analog=False)
+
+def lowpass(data: np.ndarray, cutoff: float, order: int = 4) -> np.ndarray:
+    nyq = 0.5 * SAMPLE_RATE
+    b, a = butter(order, min(cutoff / nyq, 0.95), btype="low", analog=False)
     return lfilter(b, a, data)
 
 
-def generate_pink_noise(n_samples: int) -> np.ndarray:
-    uneven = n_samples % 2
-    X = np.random.randn(n_samples // 2 + 1 + uneven) + 1j * np.random.randn(n_samples // 2 + 1 + uneven)
-    S = np.sqrt(np.arange(len(X)) + 1.0)
-    y = (np.fft.irfft(X / S)).real
-    if uneven:
-        y = y[:-1]
-    y = y / (np.max(np.abs(y)) + 1e-6)
-    return y.astype(np.float32)
+def pink_noise(n: int) -> np.ndarray:
+    uneven = n % 2
+    x = np.random.randn(n // 2 + 1 + uneven) + 1j * np.random.randn(n // 2 + 1 + uneven)
+    y = np.fft.irfft(x / np.sqrt(np.arange(len(x)) + 1.0)).real
+    y = y[:-1] if uneven else y
+    return (y / (np.max(np.abs(y)) + 1e-6)).astype(np.float32)
 
 
-def make_sub_impact(duration_s: float = 1.3, peak: float = 0.7) -> np.ndarray:
-    n = int(duration_s * SAMPLE_RATE)
-    t = np.linspace(0, duration_s, n, endpoint=False)
+def sub_impact(duration: float = 1.3, peak: float = 0.7) -> np.ndarray:
+    n = int(duration * SAMPLE_RATE)
+    t = np.linspace(0, duration, n, endpoint=False)
     freq = 32.0 + 50.0 * np.exp(-t * 4.0)
-    phase = 2 * np.pi * np.cumsum(freq) / SAMPLE_RATE
-    sub = np.sin(phase) * np.exp(-t * 3.2)
-    sub = np.tanh(sub * 1.5) * 0.7
-    return (butter_lowpass_filter(sub, 110.0) * peak).astype(np.float32)
+    body = np.sin(2 * np.pi * np.cumsum(freq) / SAMPLE_RATE) * np.exp(-t * 3.2)
+    return (lowpass(np.tanh(body * 1.5) * 0.7, 110.0) * peak).astype(np.float32)
 
 
-def make_ui_whoosh(duration_s: float = 0.7, peak: float = 0.35) -> np.ndarray:
-    n = int(duration_s * SAMPLE_RATE)
-    t = np.linspace(0, duration_s, n, endpoint=False)
-    noise = generate_pink_noise(n)
-    bell = np.exp(-((t - duration_s * 0.45) ** 2) / (2 * (0.15 ** 2)))
-    filtered = butter_lowpass_filter(noise * bell, 1100.0)
-    return (filtered * peak).astype(np.float32)
+def whoosh(duration: float = 0.7, peak: float = 0.35) -> np.ndarray:
+    n = int(duration * SAMPLE_RATE)
+    t = np.linspace(0, duration, n, endpoint=False)
+    bell = np.exp(-((t - duration * 0.45) ** 2) / (2 * 0.15 ** 2))
+    return (lowpass(pink_noise(n) * bell, 1100.0) * peak).astype(np.float32)
 
 
-def make_tech_click(peak: float = 0.28) -> np.ndarray:
-    dur = 0.04
-    n = int(dur * SAMPLE_RATE)
-    t = np.linspace(0, dur, n, endpoint=False)
-    click = np.sin(2 * np.pi * 1800.0 * t) * np.exp(-t * 80.0)
-    return (click * peak).astype(np.float32)
+def tech_click(peak: float = 0.28) -> np.ndarray:
+    n = int(0.04 * SAMPLE_RATE)
+    t = np.linspace(0, 0.04, n, endpoint=False)
+    return (np.sin(2 * np.pi * 1800 * t) * np.exp(-t * 80) * peak).astype(np.float32)
 
 
-def make_intercept_alarm(duration_s: float = 3.2, peak: float = 0.45) -> np.ndarray:
-    n = int(duration_s * SAMPLE_RATE)
-    t = np.linspace(0, duration_s, n, endpoint=False)
-    audio = np.zeros(n, dtype=np.float32)
-    burst_dur = 0.18
-    n_b = int(burst_dur * SAMPLE_RATE)
-    cur = 0
-    high = True
-    while cur + n_b <= n:
+def alarm(duration: float, peak: float = 0.45) -> np.ndarray:
+    n = int(duration * SAMPLE_RATE)
+    out = np.zeros(n, dtype=np.float32)
+    burst = int(0.18 * SAMPLE_RATE)
+    i, high = 0, True
+    while i + burst <= n:
         f = 520.0 if high else 390.0
-        t_b = np.linspace(0, burst_dur, n_b, endpoint=False)
-        tone = np.sin(2 * np.pi * f * t_b) + 0.2 * np.sin(2 * np.pi * f * 2 * t_b)
-        env = np.sin(np.pi * t_b / burst_dur) ** 2
-        audio[cur:cur + n_b] += tone * env * peak
-        cur += int(0.24 * SAMPLE_RATE)
+        tb = np.linspace(0, 0.18, burst, endpoint=False)
+        out[i:i + burst] += (np.sin(2 * np.pi * f * tb) + 0.2 * np.sin(4 * np.pi * f * tb)) \
+            * np.sin(np.pi * tb / 0.18) ** 2 * peak
+        i += int(0.24 * SAMPLE_RATE)
         high = not high
-    return butter_lowpass_filter(audio, 1200.0).astype(np.float32)
+    return lowpass(out, 1200.0)
 
 
-def make_crystal_chime(peak: float = 0.55) -> np.ndarray:
-    dur = 1.6
-    n = int(dur * SAMPLE_RATE)
-    t = np.linspace(0, dur, n, endpoint=False)
-    c1 = np.sin(2 * np.pi * 880.0 * t) * np.exp(-t * 2.8) * 0.5
-    c2 = np.sin(2 * np.pi * 1318.5 * t) * np.exp(-t * 3.5) * 0.35
-    chime = butter_lowpass_filter(c1 + c2, 2800.0)
-    return (chime * peak).astype(np.float32)
+def chime(peak: float = 0.55) -> np.ndarray:
+    n = int(1.6 * SAMPLE_RATE)
+    t = np.linspace(0, 1.6, n, endpoint=False)
+    tone = (np.sin(2 * np.pi * 880 * t) * np.exp(-t * 2.8) * 0.5
+            + np.sin(2 * np.pi * 1318.5 * t) * np.exp(-t * 3.5) * 0.35)
+    return (lowpass(tone, 2800.0) * peak).astype(np.float32)
 
 
-def load_and_resample_24k_to_48k(path: Path) -> np.ndarray:
-    sr, data = wavfile.read(str(path))
+def diesel_pull(start_rpm: float, end_rpm: float, duration: float, peak: float = 0.42) -> np.ndarray:
+    """Four-cylinder diesel under load: firing frequency = RPM / 30."""
+    n = int(duration * SAMPLE_RATE)
+    t = np.linspace(0, duration, n, endpoint=False)
+    rpm = start_rpm * (end_rpm / start_rpm) ** (t / duration)
+    firing = rpm / 30.0
+
+    def tones(mult: float, amp: float) -> np.ndarray:
+        phase = 2 * np.pi * np.cumsum(firing * mult) / SAMPLE_RATE
+        saw = 2.0 * (phase / (2 * np.pi) - np.floor(phase / (2 * np.pi) + 0.5))
+        return saw * amp
+
+    block = tones(1.0, 0.55) + tones(0.5, 0.40) + tones(2.0, 0.18) + tones(3.0, 0.09)
+    block += pink_noise(n) * 0.10
+    # Turbo spool whistle rides the same RPM ramp.
+    phase = 2 * np.pi * np.cumsum(1400.0 + (rpm / end_rpm) ** 1.4 * 4200.0) / SAMPLE_RATE
+    block += np.sin(phase) * (0.10 + 0.16 * (t / duration))
+    env = np.minimum(1.0, t / 0.35) * np.minimum(1.0, (duration - t) / 0.45)
+    return (lowpass(block * env, 2400.0) * peak).astype(np.float32)
+
+
+def music_bed(total: float) -> np.ndarray:
+    """Sparse dark-synth pulse: sub line, soft kick and a distant pad."""
+    n = int(total * SAMPLE_RATE)
+    bed = np.zeros(n, dtype=np.float32)
+    beat = 60.0 / 100.0
+    sixteenth = beat / 4.0
+
+    # D minor pulse
+    bass = {0: 36.71, 3: 43.65, 6: 49.00, 9: 55.00, 12: 65.41, 14: 73.42}
+    n16 = int(sixteenth * SAMPLE_RATE)
+    t16 = np.linspace(0, sixteenth, n16, endpoint=False)
+    for i in range(int(total / sixteenth)):
+        start = int(i * sixteenth * SAMPLE_RATE)
+        semis = i % 16
+        freq = bass.get(semis, 36.71)
+        phase = 2 * np.pi * freq * t16
+        note = (np.sin(phase) * 0.7 + np.sin(2 * phase) * 0.2) * np.exp(-t16 * 11.0)
+        if start + n16 <= n:
+            bed[start:start + n16] += (note * 0.5).astype(np.float32)
+
+    # Soft kick on every beat
+    nk = int(0.22 * SAMPLE_RATE)
+    tk = np.linspace(0, 0.22, nk, endpoint=False)
+    fk = 120.0 * np.exp(-tk * 18.0) + 42.0
+    kick = np.sin(2 * np.pi * np.cumsum(fk) / SAMPLE_RATE) * np.exp(-tk * 9.0) * 0.5
+    for b in range(int(total / beat)):
+        s = int(b * beat * SAMPLE_RATE)
+        if s + nk <= n:
+            bed[s:s + nk] += kick.astype(np.float32)
+
+    # Distant sustained pad (D minor add9), very quiet
+    t = np.linspace(0, total, n, endpoint=False)
+    pad = np.zeros(n, dtype=np.float32)
+    for f, a in ((146.83, 0.30), (174.61, 0.22), (220.00, 0.18), (329.63, 0.10)):
+        pad += np.sin(2 * np.pi * f * t) * a
+    pad *= (0.6 + 0.4 * np.sin(2 * np.pi * 0.08 * t)).astype(np.float32)
+    bed += lowpass(pad, 900.0) * 0.16
+
+    return lowpass(bed, 3200.0) * 0.42
+
+
+def load_cue(path: Path) -> np.ndarray:
+    rate, data = wavfile.read(str(path))
     if data.ndim > 1:
         data = data[:, 0]
     data = data.astype(np.float32)
     if np.max(np.abs(data)) > 1.0:
         data /= 32767.0
-    if sr != SAMPLE_RATE:
-        num_samples = int(len(data) * SAMPLE_RATE / sr)
-        data = resample(data, num_samples)
+    if rate != SAMPLE_RATE:
+        data = resample(data, int(len(data) * SAMPLE_RATE / rate)).astype(np.float32)
     return data
 
 
 def build_kokoro_master_audio(out_wav: Path) -> Path:
-    print(f"Synthesizing Kokoro-82M Master Audio Track ({TOTAL_DURATION:.1f}s)...")
     n_total = int(TOTAL_DURATION * SAMPLE_RATE)
-    track_l = np.zeros(n_total, dtype=np.float32)
-    track_r = np.zeros(n_total, dtype=np.float32)
+    narration = np.zeros(n_total, dtype=np.float32)
 
-    def inject(mono: np.ndarray, t_start_s: float, gain_l: float = 1.0, gain_r: float = 1.0):
-        idx = int(t_start_s * SAMPLE_RATE)
-        count = len(mono)
-        if idx + count <= n_total:
-            track_l[idx:idx + count] += mono * gain_l
-            track_r[idx:idx + count] += mono * gain_r
-        elif idx < n_total:
-            rem = n_total - idx
-            track_l[idx:] += mono[:rem] * gain_l
-            track_r[idx:] += mono[:rem] * gain_r
+    previous_end = 0.0
+    for name, start_s in CUES:
+        voice = load_cue(VO_DIR / name)
+        end = start_s + len(voice) / SAMPLE_RATE
+        if start_s < previous_end or end > TOTAL_DURATION:
+            raise ValueError(f"Narration overlaps or exceeds video: {name} ({start_s:.2f}-{end:.2f}s)")
+        print(f"  {name}: {start_s:.2f}-{end:.2f}s")
+        i = int(start_s * SAMPLE_RATE)
+        narration[i:i + len(voice)] += voice * 0.98
+        previous_end = end
 
-    # Strictly timed cues with ZERO overlap!
-    cues = [
-        ("sc1_hook.wav", 0.15),
-        ("sc2_ingest.wav", 7.25),
-        ("sc3_intent.wav", 17.8),
-        ("sc4_intercept.wav", 23.8),
-        ("sc5_pass.wav", 32.8),
-        ("sc6_map3d.wav", 40.8),
-        ("sc7_outro.wav", 45.8),
-    ]
+    # Side-chain: duck the bed while the narrator speaks.
+    window = int(0.20 * SAMPLE_RATE)
+    envelope = np.convolve(np.abs(narration), np.ones(window, dtype=np.float32) / window, mode="same")
+    envelope /= max(float(envelope.max()), 1e-6)
+    duck = 1.0 - 0.78 * np.clip(envelope * 6.0, 0.0, 1.0)
 
-    for fname, t_start in cues:
-        p = VO_DIR / fname
-        if p.exists():
-            vo = load_and_resample_24k_to_48k(p)
-            inject(vo * 0.98, t_start, 0.98, 0.98)
+    bed = music_bed(TOTAL_DURATION) * duck * 0.10  # ~-20 dB under speech
 
-    # Tactile Sound Effects (SFX)
-    # 0.0s: Hook Sub-Impact & Disaster Alarm
-    inject(make_sub_impact(1.8, 0.75), 0.0)
-    inject(make_intercept_alarm(3.2, 0.35), 0.1)
+    mix = narration + bed
 
-    # 7.2s: Title Reveal Impact
-    inject(make_sub_impact(1.4, 0.65), 7.2)
-    inject(make_ui_whoosh(0.8, 0.28), 7.3)
+    def add(sound: np.ndarray, start_s: float, gain: float = 1.0) -> None:
+        i = int(start_s * SAMPLE_RATE)
+        if i >= n_total:
+            return
+        chunk = sound[: n_total - i]
+        mix[i:i + len(chunk)] += chunk * gain
 
-    # 9.5s: Ingest Cards & Fast Counters Click
-    inject(make_ui_whoosh(0.7, 0.25), 9.5)
-    inject(make_tech_click(0.2), 10.2)
-    inject(make_tech_click(0.2), 10.7)
+    add(sub_impact(1.8, 0.75), 0.0)
+    add(alarm(3.2, 0.30), 0.10)
+    add(sub_impact(1.4, 0.65), 7.2)
+    add(whoosh(0.8, 0.26), 7.3)
+    add(whoosh(0.7, 0.22), 9.5)
+    add(tech_click(0.18), 10.2)
+    add(tech_click(0.18), 10.7)
+    add(whoosh(0.6, 0.22), 17.6)
 
-    # 17.6s: Intent Zoom-in Click
-    inject(make_ui_whoosh(0.6, 0.25), 17.6)
+    # Real dyno pull instead of retro blips.
+    add(diesel_pull(1290, 2190, 3.9, 0.50), 23.8)
+    add(sub_impact(2.0, 0.80), 27.5)
+    add(alarm(3.0, 0.40), 27.6)
+    add(chime(0.62), 32.8)
+    add(whoosh(0.9, 0.26), 40.8)
+    add(whoosh(1.1, 0.34), 45.8)
+    add(whoosh(1.0, 0.30), 48.0)
+    add(sub_impact(2.5, 0.85), 51.0)
+    add(chime(0.40), 51.5)
 
-    # 23.8s: Dyno Sweep
-    t_sweep = np.linspace(0, 3.5, int(3.5 * SAMPLE_RATE), endpoint=False)
-    rumble = np.sin(2 * np.pi * (45.0 + 25.0 * t_sweep) * t_sweep) * np.linspace(0.05, 0.35, len(t_sweep))
-    inject(butter_lowpass_filter(rumble, 90.0), 23.8)
+    stereo = np.vstack([mix, mix])
+    peak = float(np.max(np.abs(stereo)))
+    if peak > 0.95:
+        stereo *= 0.92 / peak
 
-    # 27.5s: Intercept Clutch Klang & Warning Alarm
-    inject(make_sub_impact(2.0, 0.8), 27.5)
-    inject(make_intercept_alarm(3.0, 0.4), 27.6)
-
-    # 32.8s: PASS Confirmation Chime
-    inject(make_crystal_chime(0.65), 32.8)
-
-    # 40.8s: 3D Map Holographic Sweep
-    inject(make_ui_whoosh(0.9, 0.3), 40.8)
-
-    # 45.8s: Ghost Car Launch & Pass Whoosh
-    inject(make_ui_whoosh(1.1, 0.4), 45.8)
-    inject(make_ui_whoosh(1.0, 0.35), 48.0)
-
-    # 51.5s: Final Grand Payoff & Sub Boom
-    inject(make_sub_impact(2.5, 0.85), 51.5)
-    inject(make_crystal_chime(0.4), 52.0)
-
-    stereo = np.vstack([track_l, track_r])
-    max_val = np.max(np.abs(stereo))
-    if max_val > 0.95:
-        stereo = stereo * (0.92 / max_val)
-
-    pcm16 = (stereo.T * 32767.0).astype(np.int16)
     out_wav.parent.mkdir(parents=True, exist_ok=True)
-    wavfile.write(str(out_wav), SAMPLE_RATE, pcm16)
-    print(f"Kokoro Master Audio Generated: {out_wav}")
+    wavfile.write(str(out_wav), SAMPLE_RATE, (stereo.T * 32767.0).astype(np.int16))
+    print(f"Master audio: {out_wav}")
     return out_wav
 
 
 if __name__ == "__main__":
-    out = ROOT / "demo_assets" / "_kokoro_vo" / "kokoro_master.wav"
-    build_kokoro_master_audio(out)
+    build_kokoro_master_audio(ROOT / "demo_assets" / "_kokoro_vo" / "kokoro_master.wav")

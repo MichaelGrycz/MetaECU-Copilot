@@ -230,16 +230,21 @@ def dyno_simulation():
         "stock_metrics": {
             "0_100_time_s": 8.8,
             "80_120_time_s": 6.8,
-            "peak_power_hp": 150.0,
+            "peak_power_km": 150.0,
+            "peak_power_hp": 147.9,
             "peak_torque_nm": 320.0,
             "spool_to_14bar_s": 4.90,
         },
         "tuned_metrics": {
             "0_100_time_s": 7.2,
             "80_120_time_s": 4.9,
-            "peak_power_hp": 185.4,
-            "peak_torque_nm": 369.0,
+            # Measured on the v10 road logs (33 WOT pulls, 2026-10-19).
+            "peak_power_km": 202.5,
+            "peak_power_hp": 199.7,
+            "peak_torque_indicated_nm": 414.0,
+            "peak_torque_nm": 376.5,  # at the clutch: limiter - friction @ 90 C
             "spool_to_14bar_s": 1.34,
+            "source": "v10 road logs, 33 WOT pulls",
         }
         if tuned
         else None,

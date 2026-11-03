@@ -124,10 +124,11 @@
   /* ═══ ACT 4: INTENT ═══ */
   #s4 .intent-pill {
     position: absolute; left: 50%; top: 260px; transform: translateX(-50%);
+    max-width: 1460px; white-space: nowrap;
     padding: 24px 50px; border-radius: 40px;
     background: rgba(15, 23, 42, 0.95); border: 2px solid #f59e0b;
     box-shadow: 0 0 60px rgba(245, 158, 11, 0.35);
-    font-size: 36px; font-weight: 700; color: #fff;
+    font-size: 32px; font-weight: 700; color: #fff;
   }
 
   /* ═══ ACT 5: DYNO & INTERCEPT ═══ */
@@ -173,6 +174,49 @@
     transition: left 0.05s linear;
   }
 
+  /* ═══ IMPACT VIGNETTE ═══ */
+  #vignette {
+    position: absolute; inset: 0; z-index: 60; pointer-events: none; opacity: 0;
+    background: radial-gradient(ellipse at center, rgba(0,0,0,0) 40%, rgba(239,68,68,0.9) 100%);
+  }
+
+  /* ═══ MAP INDEX TICKER ═══ */
+  .map-ticker {
+    position: absolute; left: 50%; top: 716px; transform: translateX(-50%);
+    width: 560px; height: 136px; overflow: hidden;
+    font-family: monospace; font-size: 13px; letter-spacing: .4px;
+    -webkit-mask-image: linear-gradient(180deg, transparent, #000 24%, #000 76%, transparent);
+    mask-image: linear-gradient(180deg, transparent, #000 24%, #000 76%, transparent);
+  }
+  .map-ticker .row { display: flex; justify-content: space-between; height: 22px; line-height: 22px; color: rgba(0,229,255,.55); }
+  .map-ticker .row b { color: rgba(248,250,252,.88); font-weight: 600; }
+  .map-ticker .row i { color: rgba(16,185,129,.85); font-style: normal; }
+
+  /* ═══ TYPEWRITER + PIPELINE ═══ */
+  #intentText .caret {
+    display: inline-block; width: 2px; height: .95em; margin-left: 2px;
+    background: #00e5ff; vertical-align: -.12em;
+  }
+  .agent-box { transition: box-shadow .35s ease, border-color .35s ease, transform .35s ease; }
+  .agent-box.lit { box-shadow: 0 0 34px rgba(0,229,255,.45); border-color: #00e5ff !important; transform: translateY(-5px); }
+
+  /* ═══ RACE MOTION ═══ */
+  .motion-lines {
+    position: absolute; inset: 0; pointer-events: none; overflow: hidden;
+    background-image: repeating-linear-gradient(0deg, rgba(255,255,255,.05) 0 1px, transparent 1px 26px);
+  }
+  .motion-lines::after {
+    content: ''; position: absolute; inset: 0;
+    background-image:
+      repeating-linear-gradient(90deg, rgba(255,255,255,.40) 0 26px, transparent 26px 150px),
+      repeating-linear-gradient(90deg, rgba(0,229,255,.30) 0 16px, transparent 16px 104px);
+    background-size: 100% 3px, 100% 2px;
+    background-repeat: repeat-x, repeat-x;
+    background-position: 0 32%, var(--off, 0px) 68%;
+    opacity: .55;
+  }
+  .speed-chip { position: absolute; right: 26px; bottom: 10px; font-family: monospace; font-weight: 800; font-size: 20px; letter-spacing: 1px; }
+
   /* ═══ ACT 9: OUTRO PAYOFF ═══ */
   #s9 { text-align: center; padding-top: 200px; }
   .payoff-badge {
@@ -197,6 +241,7 @@
     <div class="hud-badge" id="hudStatus">CRITICAL INTERCEPT</div>
   </div>
 </div>
+<div id="vignette"></div>
 
 <!-- ═══ ACT 1 (0.0s - 8.5s): THE DISASTER HOOK ═══ -->
 <div class="stage active" id="s1">
@@ -257,26 +302,28 @@
     <div class="val" style="color: #10b981; font-size: 32px;">0xD01FE500 ✓</div>
     <div class="lbl">Factory Region Checksum</div>
   </div>
+
+  <div class="map-ticker" id="mapTicker"></div>
 </div>
 
 <!-- ═══ ACT 4 (17.5s - 24.5s): INTENT & PUNCH-IN ═══ -->
 <div class="stage" id="s4">
   <div class="intent-pill">
-    <span style="color: #f59e0b;">USER INTENT:</span> "Give me 450 Nm, maximum power"
+    <span style="color: #f59e0b;">USER INTENT:</span> <span id="intentText"></span>
   </div>
 
   <div style="position: absolute; left: 50%; top: 480px; transform: translateX(-50%); display: flex; gap: 30px;">
-    <div class="glass-card" style="width: 380px; padding: 25px; text-align: center; border-color: #00e5ff;">
+    <div class="agent-box glass-card" id="ag1" style="width: 380px; padding: 25px; text-align: center; border-color: #00e5ff;">
       <div style="font-size: 32px; color: #00e5ff; margin-bottom: 8px;">⚡</div>
       <div style="font-size: 22px; font-weight: 800; color: #fff;">Meta Muse Spark 1.3</div>
       <div style="font-size: 13px; color: #94a3b8; margin-top: 6px;">Deep Reasoning Planner</div>
     </div>
-    <div class="glass-card" style="width: 380px; padding: 25px; text-align: center; border-color: #3b82f6;">
+    <div class="agent-box glass-card" style="width: 380px; padding: 25px; text-align: center; border-color: #3b82f6;" id="ag2">
       <div style="font-size: 32px; color: #3b82f6; margin-bottom: 8px;">📊</div>
       <div style="font-size: 22px; font-weight: 800; color: #fff;">EngPrt_trqLim_CUR</div>
       <div style="font-size: 13px; color: #94a3b8; margin-top: 6px;">Vectoring 450 Nm Peak Indicated</div>
     </div>
-    <div class="glass-card" style="width: 380px; padding: 25px; text-align: center; border-color: #f59e0b;">
+    <div class="agent-box glass-card" style="width: 380px; padding: 25px; text-align: center; border-color: #f59e0b;" id="ag3">
       <div style="font-size: 32px; color: #f59e0b; margin-bottom: 8px;">⛽</div>
       <div style="font-size: 22px; font-weight: 800; color: #fff;">Bosch CP1H Pump</div>
       <div style="font-size: 13px; color: #94a3b8; margin-top: 6px;">Rail Ceiling Capped: 1600 Bar</div>
@@ -321,22 +368,23 @@
       GATE PASS: 100% APPROVED
     </div>
     <div style="font-size: 26px; color: #fff; margin-top: 18px; font-weight: 700;">
-      Muse Spark Autonomously Clamped Torque to <span style="color: #10b981;">369.0 Nm</span>
+      Muse Spark Autonomously Clamped Torque to <span style="color: #10b981;">376.5 Nm</span> at the Clutch
     </div>
     <div style="display: flex; gap: 30px; justify-content: center; margin-top: 35px;">
       <div style="padding: 16px 32px; background: rgba(0,0,0,0.5); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
-        <div style="font-size: 34px; font-weight: 800; color: #10b981;">185.4 HP</div>
-        <div style="font-size: 12px; color: #94a3b8; text-transform: uppercase;">Peak Power</div>
+        <div style="font-size: 34px; font-weight: 800; color: #10b981;">202.5 KM</div>
+        <div style="font-size: 12px; color: #94a3b8; text-transform: uppercase;">Measured Peak (33 WOT logs)</div>
       </div>
       <div style="padding: 16px 32px; background: rgba(0,0,0,0.5); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
-        <div style="font-size: 34px; font-weight: 800; color: #10b981;">369.0 Nm</div>
-        <div style="font-size: 12px; color: #94a3b8; text-transform: uppercase;">Clutch Safe Effective</div>
+        <div style="font-size: 34px; font-weight: 800; color: #10b981;">376.5 Nm</div>
+        <div style="font-size: 12px; color: #94a3b8; text-transform: uppercase;">At the Clutch (414 ind.)</div>
       </div>
       <div style="padding: 16px 32px; background: rgba(0,0,0,0.5); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
         <div style="font-size: 34px; font-weight: 800; color: #00e5ff;">1.34s</div>
         <div style="font-size: 12px; color: #94a3b8; text-transform: uppercase;">Turbo Spool (-3.56s)</div>
       </div>
     </div>
+    <canvas id="passChart" width="840" height="190" style="display:block;margin:22px auto 0;"></canvas>
   </div>
 </div>
 
@@ -346,16 +394,16 @@
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
       <div>
         <div style="font-size: 28px; font-weight: 800; color: #fff;">3D Calibration Map &amp; Surgical Delta Heatmap</div>
-        <div style="font-size: 14px; color: #00e5ff; font-family: monospace;">Rail_pSetPointBase_MAP (16×16: RPM × Fuel Injection Quantity ➔ Common Rail Pressure [bar])</div>
+        <div style="font-size: 14px; color: #00e5ff; font-family: monospace;">Effective clutch torque = EngPrt_trqLim_CUR − EngM_trqFrc_MAP (real maps, 90 °C)</div>
       </div>
       <div style="display: flex; gap: 10px;">
-        <div class="hud-badge" style="background: rgba(0,229,255,0.2);">1600 BAR PEAK</div>
-        <div class="hud-badge" style="background: rgba(16,185,129,0.2); color: #10b981; border-color: #10b981;">ISO 15031-6 UNITS</div>
-        <div class="hud-badge" style="background: rgba(245,158,11,0.2); color: #f59e0b; border-color: #f59e0b;">Δ SURGICAL DELTA</div>
+        <div class="hud-badge" style="background: rgba(0,229,255,0.2);">STOCK 318 Nm</div>
+        <div class="hud-badge" style="background: rgba(16,185,129,0.2); color: #10b981; border-color: #10b981;">TUNED 362 Nm</div>
+        <div class="hud-badge" style="background: rgba(245,158,11,0.2); color: #f59e0b; border-color: #f59e0b;">Δ +46 Nm</div>
       </div>
     </div>
     <div style="position: relative; width: 100%; height: 510px; display: flex; justify-content: center; align-items: center; overflow: hidden; border-radius: 14px; background: rgba(10, 16, 26, 0.95); border: 1px solid rgba(0, 229, 255, 0.25);">
-      <img src="real_rail_surface_3d.png" style="width: 100%; height: 100%; object-fit: contain;" alt="Real Bosch 3D Rail Map" />
+      <canvas id="mesh3d" width="1220" height="500" style="width:100%;height:100%;display:block;"></canvas>
     </div>
   </div>
 </div>
@@ -379,10 +427,12 @@
 
   <div class="drag-track">
     <div class="drag-lane">
-      <div style="display: flex; justify-content: space-between; font-size: 15px; font-weight: 700; color: #94a3b8;">
+      <div class="motion-lines" id="linesStock"></div>
+      <div style="position:relative;z-index:1;display: flex; justify-content: space-between; font-size: 15px; font-weight: 700; color: #94a3b8;">
         <span>STOCK SAAB 9-3 1.9 TID (v9 CALIBRATION)</span>
         <span style="color: #ef4444;">TURBO BOOST SPOOL LAG: 4.90s</span>
       </div>
+      <div class="speed-chip" id="spdStock" style="color:#ef4444;">60 km/h</div>
       <div class="car-icon" id="carStock">
         <svg viewBox="0 0 160 50" width="140" height="44" style="overflow: visible;">
           <circle cx="36" cy="36" r="10" fill="#080d16" stroke="#94a3b8" stroke-width="2.5"/>
@@ -399,10 +449,12 @@
     </div>
 
     <div class="drag-lane" style="border-color: rgba(0, 229, 255, 0.4); box-shadow: 0 0 35px rgba(0,229,255,0.2);">
-      <div style="display: flex; justify-content: space-between; font-size: 15px; font-weight: 700; color: #00e5ff;">
+      <div class="motion-lines" id="linesTuned" style="opacity:.85"></div>
+      <div style="position:relative;z-index:1;display: flex; justify-content: space-between; font-size: 15px; font-weight: 700; color: #00e5ff;">
         <span>METAECU COPILOT (v10 EXTENDED SPOOL &amp; PUNCH)</span>
         <span style="color: #10b981;" id="dragLiveDelta">INSTANT BOOST: 1.34s (-3.56s FASTER!)</span>
       </div>
+      <div class="speed-chip" id="spdTuned" style="color:#10b981;">60 km/h</div>
       <div class="car-icon" id="carTuned">
         <svg viewBox="0 0 160 50" width="140" height="44" style="overflow: visible;">
           <circle cx="36" cy="36" r="10" fill="#080d16" stroke="#00e5ff" stroke-width="2.5"/>
@@ -424,7 +476,7 @@
 <!-- ═══ ACT 9 (55.5s - 65.0s): HIL & FINAL GRAND PAYOFF ═══ -->
 <div class="stage" id="s9">
   <div style="text-align: center; margin-top: 140px;">
-    <div class="payoff-badge">✓ 185.4 HP · 369 Nm · 0 CLUTCH SLIP · 1.34s SPOOL — 100% SAFE</div>
+    <div class="payoff-badge">✓ 202.5 KM · 376.5 Nm at the clutch · 0 SLIP · 1.34s SPOOL — INSIDE 377 Nm</div>
     <div style="font-size: 80px; font-weight: 900; letter-spacing: -2px;" class="glow-cyan">MetaECU Copilot</div>
     <div style="font-size: 26px; color: #94a3b8; margin-top: 10px; font-weight: 500;">
       AI Proposes. Physics Disposes.
@@ -453,7 +505,7 @@
     z: Math.random() * 1000 + 200, sz: Math.random() * 2 + 1
   }));
 
-  function drawBg() {
+  function drawBg(sec = 0) {
     bgCtx.fillStyle = '#060a12';
     bgCtx.fillRect(0, 0, 1920, 1080);
     const grad = bgCtx.createRadialGradient(960, 540, 50, 960, 540, 900);
@@ -464,15 +516,241 @@
 
     bgCtx.fillStyle = 'rgba(0, 229, 255, 0.5)';
     stars.forEach(s => {
-      s.y -= 0.5;
-      if (s.y < 0) s.y = 1080;
+      const y = ((s.y - sec * 30) % 1080 + 1080) % 1080;
       bgCtx.beginPath();
-      bgCtx.arc(s.x, s.y, s.sz, 0, Math.PI * 2);
+      bgCtx.arc(s.x, y, s.sz, 0, Math.PI * 2);
       bgCtx.fill();
     });
-    requestAnimationFrame(drawBg);
   }
   drawBg();
+
+  /* ═══ REAL DATA: effective clutch torque (limiter − friction), stock vs tuned ═══ */
+  const SURF = {"rpm":[1250,1500,1750,2000,2250,2500,2750,3000,3250,3500,4000,4500,5000],"temp":[39,49,59,69,79,89,99,109],"stock":[[274,280,286,292,298,304,308,311,314,316,318,318,318],[271,276,282,288,296,301,304,308,311,313,315,315,315],[270,276,282,288,296,300,304,308,310,312,314,314,314],[262,267,273,279,287,293,296,300,302,304,306,306,306],[249,255,261,267,274,281,284,288,290,292,294,294,294],[217,222,228,234,242,248,252,255,258,260,262,262,262],[167,173,178,184,191,198,202,204,208,210,214,214,214],[0,5,11,16,23,29,34,37,40,44,47,47,47]],"tuned":[[318,324,330,336,342,348,352,355,358,360,362,362,362],[303,308,314,320,327,333,336,340,343,345,347,347,347],[299,304,310,316,324,329,332,336,339,341,343,343,343],[295,300,306,312,320,326,329,332,335,337,339,339,339],[257,262,268,274,282,288,292,295,297,299,301,301,301],[250,256,261,268,275,282,286,288,291,293,295,295,295],[247,252,257,264,270,277,281,284,287,290,293,293,293],[29,34,39,45,52,58,63,66,69,72,76,76,76]]};
+
+  const MAP_NAMES = ['EngPrt_trqLim_CUR','EngM_trqFrc_MAP','Rail_pSetPointBase_MAP','PCR_pDesBas_MAP','FlMng_rLmbdSmkLow_MAP','InjCrv_phiMI1Bas1_MAP','AirCtl_mDesBas_MAP','AirCtl_rEGRBas_MAP','AirCtl_rTvaBas_MAP','AccPed_trqEng_MAP','AccPed_trqEngB_MAP','AccPed_trqPrp_MAP','SOI_main_MAP','VNT_dutyCycle_MAP','AFSCD_facPlsCor_MAP','AirCtl_facNQPar_MAP','AirCtl_NQIATSCor_MAP','AirCtl_rTVARgn_MAP','AirCtl_mDvtBas_MAP','ACCtl_rLoAccPed_MAP','AirCtl_rIDflVal_MAP','EngPrt_trqLimMax_C','EngPrt_swtTrq_C','Gearbx_trqMaxGear1_CUR'];
+
+  function ticker(sec) {
+    const el = document.getElementById('mapTicker');
+    if (!el) return;
+    const visible = 6;
+    const offset = Math.floor(Math.max(0, sec - 9.5) * 5.0);
+    let html = '';
+    for (let i = 0; i < visible; i++) {
+      const idx = (offset + i) % MAP_NAMES.length;
+      const done = Math.min(774, offset + i + 1);
+      html += `<div class="row"><span>${String(done).padStart(3, '0')}/774</span><b>${MAP_NAMES[idx]}</b><i>✓</i></div>`;
+    }
+    el.innerHTML = html;
+  }
+
+  function intent(sec) {
+    const el = document.getElementById('intentText');
+    if (!el) return;
+    const text = '"Give me 450 Nm, maximum power"';
+    const p = Math.min(1, Math.max(0, (sec - 17.6) / 1.7));
+    el.innerHTML = text.slice(0, Math.round(p * text.length)) + '<span class="caret"></span>';
+    [['ag1', 19.5], ['ag2', 20.3], ['ag3', 21.1]].forEach(([id, t]) => {
+      const node = document.getElementById(id);
+      if (node) node.classList.toggle('lit', sec >= t && sec < 23.4);
+    });
+  }
+
+  function passChart(sec) {
+    const c = document.getElementById('passChart');
+    if (!c) return;
+    const g = c.getContext('2d'), W = c.width, H = c.height;
+    g.clearRect(0, 0, W, H);
+    const x0 = 54, x1 = W - 96, y0 = H - 30, y1 = 18;
+    const maxV = 460;
+    const Y = v => y0 - (v / maxV) * (y0 - y1);
+    const X = t => x0 + t * (x1 - x0);
+
+    g.strokeStyle = 'rgba(148,163,184,.16)';
+    g.lineWidth = 1;
+    for (let v = 0; v <= 400; v += 100) {
+      g.beginPath(); g.moveTo(x0, Y(v)); g.lineTo(x1, Y(v)); g.stroke();
+      g.fillStyle = 'rgba(148,163,184,.65)'; g.font = '11px monospace';
+      g.fillText(v + ' Nm', 6, Y(v) + 4);
+    }
+
+    // unclamped request
+    const req = t => 300 + 138.5 * Math.pow(Math.sin(Math.PI * Math.min(1, t * 1.02)), 0.8);
+    g.strokeStyle = 'rgba(239,68,68,.85)'; g.lineWidth = 2.5; g.setLineDash([7, 5]);
+    g.beginPath();
+    for (let i = 0; i <= 100; i++) {
+      const t = i / 100;
+      i ? g.lineTo(X(t), Y(req(t))) : g.moveTo(X(t), Y(req(t)));
+    }
+    g.stroke(); g.setLineDash([]);
+
+    // the F40 limit and the clamp
+    const limit = 377, clamped = 376.5;
+    g.strokeStyle = 'rgba(239,68,68,.55)'; g.lineWidth = 1.5;
+    g.beginPath(); g.moveTo(x0, Y(limit)); g.lineTo(x1, Y(limit)); g.stroke();
+    g.fillStyle = 'rgba(239,68,68,.9)'; g.font = 'bold 11px monospace';
+    g.fillText('377.0 Nm F40 LIMIT', x1 - 150, Y(limit) - 7);
+
+    const p = Math.min(1, Math.max(0, (sec - 33.3) / 2.4));
+    g.strokeStyle = '#10b981'; g.lineWidth = 3;
+    g.beginPath();
+    const last = Math.round(p * 100);
+    for (let i = 0; i <= last; i++) {
+      const t = i / 100;
+      const v = Math.min(req(t), clamped);
+      i ? g.lineTo(X(t), Y(v)) : g.moveTo(X(t), Y(v));
+    }
+    g.stroke();
+
+    g.fillStyle = 'rgba(16,185,129,.95)'; g.font = 'bold 12px monospace';
+    g.fillText('CLAMPED ' + clamped.toFixed(1) + ' Nm', X(0.52), Y(clamped) + 20);
+    g.fillStyle = 'rgba(239,68,68,.85)';
+    g.fillText('438.5 Nm REQUESTED', X(0.42), Y(438.5) - 8);
+  }
+
+  function mesh3d(sec) {
+    const c = document.getElementById('mesh3d');
+    if (!c) return;
+    const g = c.getContext('2d'), W = c.width, H = c.height;
+    g.clearRect(0, 0, W, H);
+    const rows = SURF.temp.length, cols = SURF.rpm.length;
+    const p = Math.min(1, Math.max(0, (sec - 41.0) / 3.4));
+    const m = p * p * (3 - 2 * p);
+    const zMax = 400;
+    const angle = Math.sin((sec - 40.5) * 0.35) * 0.22;   // slow orbit
+    const cos = Math.cos(angle), sin = Math.sin(angle);
+
+    const world = (ci, ri, v) => {
+      const u = (ci / (cols - 1) - 0.5);
+      const w = (ri / (rows - 1) - 0.5);
+      const x = u * 1.55 + w * 0.50;
+      const y = -(v / zMax) * 0.72 + w * 0.42;
+      return [x * cos - y * sin, x * sin + y * cos];
+    };
+    const zAt = (ri, ci) => SURF.stock[ri][ci] + (SURF.tuned[ri][ci] - SURF.stock[ri][ci]) * m;
+
+    // Fit a stable world box (independent of the morph) into the canvas.
+    const corners = [[-1.03, -1.14], [1.03, -1.14], [1.03, 0.21], [-1.03, 0.21]]
+      .map(([x, y]) => [x * cos - y * sin, x * sin + y * cos]);
+    const xs = corners.map(q => q[0]), ys = corners.map(q => q[1]);
+    const minX = Math.min(...xs), maxX = Math.max(...xs);
+    const minY = Math.min(...ys), maxY = Math.max(...ys);
+    const padX = 70, padTop = 26, padBottom = 40;
+    const scale = Math.min((W - 2 * padX) / (maxX - minX), (H - padTop - padBottom) / (maxY - minY)) * 1.12;
+    const ox = (W - (maxX - minX) * scale) / 2 - minX * scale;
+    const oy = padTop - minY * scale;
+    const proj = (ci, ri, v) => {
+      const q = world(ci, ri, v);
+      return [q[0] * scale + ox, q[1] * scale + oy];
+    };
+
+    // 377 Nm ceiling: dashed line along the back edge only (cleaner than a quad).
+    const b0 = proj(0, 0, 377), b1 = proj(cols - 1, 0, 377);
+    g.setLineDash([7, 6]);
+    g.strokeStyle = 'rgba(239,68,68,.75)'; g.lineWidth = 1.6;
+    g.beginPath(); g.moveTo(b0[0], b0[1]); g.lineTo(b1[0], b1[1]); g.stroke();
+    g.setLineDash([]);
+    g.fillStyle = 'rgba(239,68,68,.95)'; g.font = 'bold 12px monospace';
+    g.fillText('377 Nm F40 ceiling', b0[0] + 4, b0[1] - 8);
+
+    const colour = v => {
+      const t = Math.min(1, Math.max(0, (v - 100) / 280));
+      return `hsla(${198 - 150 * t}, 95%, ${60 - 8 * t}%, `;
+    };
+
+    for (let ri = 0; ri < rows - 1; ri++) {
+      for (let ci = 0; ci < cols - 1; ci++) {
+        const v = (zAt(ri, ci) + zAt(ri, ci + 1) + zAt(ri + 1, ci) + zAt(ri + 1, ci + 1)) / 4;
+        const a = proj(ci, ri, zAt(ri, ci));
+        const b = proj(ci + 1, ri, zAt(ri, ci + 1));
+        const d = proj(ci + 1, ri + 1, zAt(ri + 1, ci + 1));
+        const e = proj(ci, ri + 1, zAt(ri + 1, ci));
+        g.beginPath(); g.moveTo(a[0], a[1]); g.lineTo(b[0], b[1]); g.lineTo(d[0], d[1]); g.lineTo(e[0], e[1]); g.closePath();
+        g.fillStyle = colour(v) + '0.62)'; g.fill();
+      }
+    }
+    // faint floor grid at z = 0 for depth
+    g.strokeStyle = 'rgba(0,229,255,.10)'; g.lineWidth = 1;
+    for (let ri = 0; ri < rows; ri++) {
+      g.beginPath();
+      for (let ci = 0; ci < cols; ci++) {
+        const q = proj(ci, ri, 0);
+        ci ? g.lineTo(q[0], q[1]) : g.moveTo(q[0], q[1]);
+      }
+      g.stroke();
+    }
+    for (let ci = 0; ci < cols; ci++) {
+      g.beginPath();
+      for (let ri = 0; ri < rows; ri++) {
+        const q = proj(ci, ri, 0);
+        ri ? g.lineTo(q[0], q[1]) : g.moveTo(q[0], q[1]);
+      }
+      g.stroke();
+    }
+
+    for (let ri = 0; ri < rows; ri++) {
+      g.beginPath();
+      for (let ci = 0; ci < cols; ci++) {
+        const q = proj(ci, ri, zAt(ri, ci));
+        ci ? g.lineTo(q[0], q[1]) : g.moveTo(q[0], q[1]);
+      }
+      g.strokeStyle = 'rgba(255,255,255,.42)'; g.lineWidth = 1; g.stroke();
+    }
+    for (let ci = 0; ci < cols; ci++) {
+      g.beginPath();
+      for (let ri = 0; ri < rows; ri++) {
+        const q = proj(ci, ri, zAt(ri, ci));
+        ri ? g.lineTo(q[0], q[1]) : g.moveTo(q[0], q[1]);
+      }
+      g.strokeStyle = 'rgba(255,255,255,.20)'; g.lineWidth = 1; g.stroke();
+    }
+
+    let peak = 0;
+    for (let ri = 0; ri < rows; ri++) for (let ci = 0; ci < cols; ci++) peak = Math.max(peak, zAt(ri, ci));
+    g.fillStyle = 'rgba(248,250,252,.95)'; g.font = 'bold 15px monospace';
+    g.fillText(`peak ${peak.toFixed(0)} Nm`, W - 176, 30);
+    g.fillStyle = `rgba(16,185,129,${0.55 + 0.45 * m})`; g.font = 'bold 13px monospace';
+    g.fillText(`Δ +${(46 * m).toFixed(0)} Nm`, W - 176, 52);
+    g.fillStyle = 'rgba(0,229,255,.75)'; g.font = '12px monospace';
+    g.fillText('oil temp 39→109 °C  ·  RPM 1250→5000  ·  stock → tuned', 20, H - 14);
+  }
+
+  function race(sec) {
+    const p = Math.min(1, Math.max(0, (sec - 45.5) / 5.5));
+    const tunedX = 40 + p * 1400;
+    const stockX = 40 + Math.pow(p, 1.8) * 850;
+    document.getElementById('carTuned').style.left = tunedX + 'px';
+    document.getElementById('carStock').style.left = stockX + 'px';
+
+    const vT = Math.round(60 + 80 * Math.min(1, p * 1.15));
+    const vS = Math.round(60 + 80 * Math.pow(p, 1.9));
+    document.getElementById('spdTuned').textContent = vT + ' km/h';
+    document.getElementById('spdStock').textContent = vS + ' km/h';
+
+    for (const [id, k] of [['linesTuned', 320], ['linesStock', 150]]) {
+      const node = document.getElementById(id);
+      if (node) node.style.setProperty('--off', (-sec * k).toFixed(0) + 'px');
+    }
+
+    const leadM = Math.round(p * 45);
+    document.getElementById('dragLiveDelta').textContent = `+${leadM} METERS AHEAD · 1.34s vs 4.90s SPOOL`;
+  }
+
+  function impact(sec) {
+    const flash = sec >= 27.9 && sec <= 28.35 ? 1 - (sec - 27.9) / 0.45 : 0;
+    document.getElementById('vignette').style.opacity = flash.toFixed(3);
+
+    let amp = 0, t0 = 0;
+    if (sec >= 28.0 && sec < 28.2) { amp = 11; t0 = 28.0; }
+    else if (sec < 0.45) { amp = 7; t0 = 0; }
+    const body = document.getElementById('mainBody');
+    if (amp > 0) {
+      const k = 1 - (sec - t0) / (sec < 1 ? 0.45 : 0.2);
+      const dx = amp * k * Math.sin((sec - t0) * 300);
+      body.style.transform = `translate3d(${dx.toFixed(1)}px, ${(-dx * 0.6).toFixed(1)}px, 0)`;
+    } else {
+      body.style.transform = '';
+    }
+  }
 
   /* ═══ MASTER TIMELINE CONTROLLER (56.5s Kokoro Neural Edit) ═══ */
   var currentTime = 0;
@@ -487,12 +765,14 @@
     { t: 32.5, stage: 's6', status: 'GATE APPROVAL' },
     { t: 40.5, stage: 's7', status: '3D MAP STUDIO' },
     { t: 45.5, stage: 's8', status: 'GHOST CAR DRAG' },
-    { t: 51.5, stage: 's9', status: 'FINAL PAYOFF' },
+    { t: 51.0, stage: 's9', status: 'FINAL PAYOFF' },
   ];
+  window.trailerTimeline = timeline;
 
   function applyTimeline(sec) {
     currentTime = sec;
-    
+    drawBg(sec);
+
     let curMilestone = timeline[0];
     for (const m of timeline) {
       if (sec >= m.t) curMilestone = m;
@@ -507,45 +787,35 @@
 
     document.getElementById('hudStatus').textContent = curMilestone.status;
 
-    // Act 1: Screen shake on the disaster hook
-    if (curMilestone.stage === 's1') {
-      document.getElementById('mainBody').classList.add('shake');
-    } else {
-      document.getElementById('mainBody').classList.remove('shake');
-    }
-
-    // Act 3: Fast counters (2.5s duration)
+    // Act 3: counters + live map index stream
     if (curMilestone.stage === 's3') {
       const prog = Math.min(1, Math.max(0, (sec - 9.5) / 2.5));
       document.getElementById('cntBytes').textContent = Math.round(prog * 2097152).toLocaleString();
       document.getElementById('cntMaps').textContent = Math.round(prog * 774);
+      ticker(sec);
     }
 
-    // Act 4: Zoom in on intent
+    // Act 4: typewriter + pipeline cascade
     if (curMilestone.stage === 's4') {
-      document.getElementById('s4').classList.add('zoom-in');
-    } else {
-      document.getElementById('s4').classList.remove('zoom-in');
+      intent(sec);
     }
 
-    // Act 5: Dyno dial sweep & Intercept
+    // Act 5: dyno sweep & intercept (also runs the impact layer)
     if (curMilestone.stage === 's5') {
       const banner = document.getElementById('interceptBanner');
       const sweep = document.getElementById('dialSweep');
       const rpmText = document.getElementById('dynoRpmText');
       const trqText = document.getElementById('dynoTorqueText');
-      
+
       if (sec < 27.5) {
         banner.classList.remove('show');
+        sweep.style.stroke = '#00e5ff';
         const prog = Math.min(1, Math.max(0, (sec - 23.5) / 4.0));
-        const rpm = Math.round(1000 + prog * 1200);
-        const trq = (320 + prog * 118.5).toFixed(1);
-        rpmText.textContent = rpm;
-        trqText.textContent = trq + ' Nm';
+        rpmText.textContent = Math.round(1000 + prog * 1200);
+        trqText.textContent = (320 + prog * 118.5).toFixed(1) + ' Nm';
         sweep.style.strokeDashoffset = 754 - (prog * 360);
       } else {
         banner.classList.add('show');
-        document.getElementById('mainBody').classList.add('shake');
         rpmText.textContent = '2200';
         trqText.textContent = '438.5 Nm';
         sweep.style.stroke = '#ef4444';
@@ -553,40 +823,30 @@
       }
     }
 
-    // Act 7: 3D Surface continuous rotation & push-in
-    if (curMilestone.stage === 's7') {
-      const p = Math.min(1, Math.max(0, (sec - 40.5) / 5.0));
-      const scale = 1.0 + p * 0.14; // smooth camera push-in
-      const rotY = (p - 0.5) * 20;  // continuous 20 deg Y-orbit
-      const rotZ = (p - 0.5) * 12;  // continuous 12 deg Z-rotation
-      const card = document.getElementById('surfaceCard');
-      if (card) {
-        card.style.transform = `translate(-50%, -50%) rotateY(${rotY}deg) rotateX(4deg) scale(${scale})`;
-      }
-      const imgEl = document.querySelector('#s7 img');
-      if (imgEl) {
-        imgEl.style.transform = `rotateZ(${rotZ}deg)`;
-        imgEl.style.transformOrigin = "center center";
-      }
-    }
+    if (curMilestone.stage === 's6') passChart(sec);
+    if (curMilestone.stage === 's7') mesh3d(sec);
+    if (curMilestone.stage === 's8') race(sec);
 
-    // Act 8: Ghost Car Race with live delta
-    if (curMilestone.stage === 's8') {
-      const p = Math.min(1, Math.max(0, (sec - 45.5) / 5.5));
-      const tunedX = 40 + p * 1400;
-      const stockX = 40 + Math.pow(p, 1.8) * 850;
-      document.getElementById('carTuned').style.left = tunedX + 'px';
-      document.getElementById('carStock').style.left = stockX + 'px';
-      
-      const leadM = Math.round(p * 45);
-      document.getElementById('dragLiveDelta').textContent = `LEAD: +${leadM} METERS (INSTANT 1.34s SPOOL vs 4.90s LAG)`;
-    }
+    impact(sec);
   }
 
   window.isManual = false;
   window.setTime = function(sec) {
     window.isManual = true;
+    animActive = false;
+    // The encoder owns the clock; no wall-clock transitions may leak into frames.
+    document.querySelectorAll('.stage, .car-icon, .agent-box').forEach(el => {
+      el.style.transition = 'none';
+    });
     applyTimeline(sec);
+    document.getElementById('s4').style.transform = activeStageId === 's4'
+      ? `scale(${1 + 0.18 * Math.min(1, Math.max(0, (sec - 17.5) / 0.4))})`
+      : '';
+    document.getAnimations().forEach(animation => {
+      animation.pause();
+      animation.currentTime = 0;
+    });
+    return { time: sec, stage: activeStageId };
   };
 
   let animStart = null;
@@ -594,7 +854,7 @@
 
   function runAnimLoop(ts) {
     if (!animActive) return;
-    if (!animStart) animStart = ts;
+    if (animStart === null) animStart = ts;
     const elapsed = (ts - animStart) / 1000;
     if (elapsed <= 56.5) {
       applyTimeline(elapsed);

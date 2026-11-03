@@ -1,0 +1,62 @@
+# Trailer audio/video synchronization
+
+The approved Kokoro `am_adam` WAV files are reused by default. Regeneration is
+explicit: `python tools/render_motion_graphics_video.py --regenerate-voiceover`.
+
+## Cause of the old drift
+
+The old MP4 contained 51.0 seconds of video (1275 frames at 25 fps), but 56.5
+seconds of audio. Wall-clock Playwright video recording did not preserve the
+animation clock. Checking only the container duration hid the truncated video.
+Moving a single scene cut cannot repair that accumulating drift.
+
+## Rendering and verification
+
+Run from the repository root:
+
+```text
+python -m unittest tools.test_trailer_sync -v
+python tools/render_motion_graphics_video.py
+```
+
+The renderer calls `window.setTime(frame / 30)` for each of 1695 screenshots.
+FFmpeg receives those frames at exactly 30 fps. Rendering may be slower than
+real time; this has no effect on the resulting timestamps. Background movement,
+manual zoom and CSS animation sampling use the same explicit clock.
+
+Before replacing the main MP4, the renderer checks **both stream durations**,
+the frame count, JavaScript errors, narration overlap/end times, and decoded
+MP4 frames against their source screenshots. Evidence and the previous MP4
+are retained in a uniquely named `demo_assets/_mg_tmp/` job directory.
+
+## Late-scene timing
+
+| Image | Visible interval | Narration interval |
+| --- | --- | --- |
+| Dyno / red intercept | 23.50–32.50 s (alarm from 27.50 s) | 23.80–32.23 s |
+| Gate Pass | 32.50–40.50 s | 32.80–40.27 s |
+| Rotating map | 40.50–45.50 s | 40.80–45.42 s |
+| Ghost Car | 45.50–51.00 s | Race sentence starts at 45.80 s |
+| Final links / metrics | 51.00–56.50 s | Summary follows the pause in `sc7_outro.wav` |
+
+The final summary is already present in the approved WAV. It is not duplicated:
+“Two hundred two metric horsepower, zero clutch slip, one hundred percent safe.”
+
+## Measured figures used on screen
+
+`185.4 HP` was a hard-coded placeholder from the demo simulator
+(`dyno_simulation` in `web_app.py`), not a measurement. It has been removed from
+the trailer. On-screen numbers now come from the v10 road logs:
+
+| Figure | Value | Source |
+| --- | --- | --- |
+| Peak power | **202.5 KM** | `telemetria_drogowa_v10/RAPORT_TELEMETRII_V10.md` |
+| Indicated torque | **414 Nm** | same report, 33 WOT pulls |
+| Torque at the clutch | **376.5 Nm** | limiter − friction @ 90 °C |
+| Turbo spool | **1.34 s** | v10 log vs 4.90 s in v9 |
+
+The 3D panel plots the real effective-torque surface (limiter − friction) built
+from the stock and tuned binaries: stock peaks at 318 Nm, tuned at 362 Nm on the
+sampled grid, +46 Nm of genuine delta. The rail-pressure map is **identical** in
+both binaries, so it is not used for the morph.
+

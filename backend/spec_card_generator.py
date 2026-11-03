@@ -130,7 +130,7 @@ def generate_spec_card_html(
   <div class="stat-grid">
     <div class="stat-box">
       <div class="stat-label">Power Output</div>
-      <div class="stat-val">185.4 HP <span class="gain">+35.4 HP</span></div>
+      <div class="stat-val">202.5 KM <span class="gain">+52.5 KM</span></div>
     </div>
     <div class="stat-box">
       <div class="stat-label">Clutch Torque</div>

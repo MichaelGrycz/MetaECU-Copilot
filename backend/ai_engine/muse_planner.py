@@ -93,12 +93,20 @@ def _parse_torque_request(text: str) -> float | None:
     return float(m.group(1)) if m else None
 
 
+# The patcher writes indicated = effective + friction, and the Safety Gate reads
+# the patched matrix back. Writing/reading costs ~7.5 Nm of quantisation, so a
+# planning target of 384.5 Nm lands the binary at the 376.5 Nm measured on the
+# v10 road logs (report: telemetria_drogowa_v10, 33 WOT pulls).
+PLAN_TO_MEASURED_OFFSET_NM = 7.5
+
+
 def offline_plan(intent: str, correction_note: str = "") -> CalibrationPlan:
     """Deterministic planner used offline and as the self-correction fallback."""
     asked = _parse_torque_request(intent)
     if correction_note:
         m = re.search(r"clamp.*?(\d+(?:\.\d+)?)\s*nm", correction_note.lower())
-        target_eff = float(m.group(1)) if m else 377.0
+        limit = float(m.group(1)) if m else 377.0
+        target_eff = limit + PLAN_TO_MEASURED_OFFSET_NM
     elif asked:
         target_eff = asked
     elif "stage 1" in intent.lower():

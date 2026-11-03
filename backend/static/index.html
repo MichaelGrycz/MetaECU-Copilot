@@ -764,13 +764,13 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-left font-mono text-xs">
               <div class="bg-black/50 p-3 rounded-lg border border-white/5">
                 <span class="text-slate-500 block text-[10px] uppercase" id="lblStatOutput">Peak Power</span>
-                <span class="text-emerald-300 font-bold text-sm">185.4 HP</span>
-                <span class="text-slate-400 block text-[10px]">+35.4 HP vs OEM</span>
+                <span class="text-emerald-300 font-bold text-sm">202.5 KM</span>
+                <span class="text-slate-400 block text-[10px]">+52.5 KM vs OEM · 33 WOT logs</span>
               </div>
               <div class="bg-black/50 p-3 rounded-lg border border-white/5">
-                <span class="text-slate-500 block text-[10px] uppercase" id="lblStatTrq">Effective Torque</span>
-                <span class="text-emerald-300 font-bold text-sm">369.0 Nm</span>
-                <span class="text-slate-400 block text-[10px]">&lt; 377 Nm F40 Limit</span>
+                <span class="text-slate-500 block text-[10px] uppercase" id="lblStatTrq">Clutch Torque</span>
+                <span class="text-emerald-300 font-bold text-sm">376.5 Nm</span>
+                <span class="text-slate-400 block text-[10px]">414 Nm ind. · &lt; 377 Nm F40</span>
               </div>
               <div class="bg-black/50 p-3 rounded-lg border border-white/5">
                 <span class="text-slate-500 block text-[10px] uppercase" id="lblStatSpool">Turbo Spool (4th)</span>
@@ -1720,7 +1720,7 @@
           MetaFx.flutter();
           MetaFx.pass();
         }
-        thought(`WOT Dyno test completed: 185.4 HP @ 3800 RPM · 369.0 Nm @ 2000 RPM. Zero clutch slip.`, {
+        thought(`WOT Dyno test completed: 202.5 KM @ 4200 RPM · 376.5 Nm at the clutch (414 Nm ind.). Zero clutch slip.`, {
           icon: "✓",
           tone: "good",
         });
@@ -1774,7 +1774,7 @@
           },
           {
             lab: "Peak Power Detected",
-            val: d.peak_power_hp ? `${d.peak_power_hp} HP` : "—",
+            val: d.peak_power_km ? `${d.peak_power_km} KM` : d.peak_power_hp ? `${d.peak_power_hp} HP` : "—",
             sub: d.peak_power_rpm ? `@ ${d.peak_power_rpm} RPM` : "Calculated",
             tone: "text-cyan-400",
           },
