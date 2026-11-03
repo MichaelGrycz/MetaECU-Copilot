@@ -31,7 +31,6 @@ def _handle_remove_readonly(func, path, excinfo):
 
 # Exact files and directories built for the hackathon
 INCLUDED = [
-    ".github",
     "backend",
     "tools",
     "demo_assets",
