@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MetaECU Copilot — Cinema Motion Graphics</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1920px; height: 1080px; overflow: hidden;
+    background: #060a12;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: #f8fafc;
+    perspective: 1200px;
+    user-select: none;
+  }
+
+  /* Deep Space Neon Grid Background */
+  #bgCanvas {
+    position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; z-index: 1;
+  }
+
+  /* Motorsport HUD Frame */
+  .hud-frame {
+    position: absolute; left: 0; top: 0; width: 1920px; height: 1080px;
+    pointer-events: none; z-index: 50;
+    border: 1px solid rgba(0, 229, 255, 0.2);
+  }
+  .hud-frame::before {
+    content: ''; position: absolute; left: 0; top: 0; width: 100%; height: 5px;
+    background: linear-gradient(90deg, #00e5ff, #3b82f6, #00e5ff);
+  }
+  .hud-frame::after {
+    content: ''; position: absolute; left: 0; bottom: 0; width: 100%; height: 5px;
+    background: linear-gradient(90deg, #00e5ff, #3b82f6, #00e5ff);
+  }
+  .hud-header {
+    position: absolute; left: 50px; top: 25px; display: flex; align-items: center; gap: 20px;
+  }
+  .hud-logo {
+    font-size: 20px; font-weight: 800; letter-spacing: 2px; color: #fff;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .hud-badge {
+    padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: 700;
+    letter-spacing: 1.5px; background: rgba(0, 229, 255, 0.15);
+    border: 1px solid rgba(0, 229, 255, 0.4); color: #00e5ff; font-family: monospace;
+  }
+
+  /* Scenes Container */
+  .stage {
+    position: absolute; left: 0; top: 0; width: 1920px; height: 1080px;
+    z-index: 10; display: none; opacity: 0; transform-style: preserve-3d;
+  }
+  .stage.active {
+    display: block; opacity: 1;
+  }
+
+  /* Common Motion Card Styling */
+  .glass-card {
+    background: rgba(15, 23, 42, 0.78);
+    backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(0, 229, 255, 0.15);
+  }
+  .glow-cyan { text-shadow: 0 0 25px rgba(0, 229, 255, 0.8); }
+  .glow-red { text-shadow: 0 0 30px rgba(239, 68, 68, 0.9); }
+  .glow-green { text-shadow: 0 0 30px rgba(16, 185, 129, 0.9); }
+
+  /* Subtitles Bar (Bottom 60px, completely non-obtrusive) */
+  #subtitlesBar {
+    position: absolute; left: 0; bottom: 20px; width: 100%;
+    text-align: center; z-index: 100; pointer-events: none;
+  }
+  #subtitlesText {
+    display: inline-block; padding: 6px 24px; border-radius: 20px;
+    font-size: 20px; font-weight: 600; color: #ffffff;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.9), 0 0 10px rgba(0,0,0,0.8);
+    background: rgba(6, 10, 18, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    letter-spacing: 0.5px;
+  }
+
+  /* Screen Shake on Intercept */
+  .shake {
+    animation: screenShake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+  }
+  @keyframes screenShake {
+    10%, 90% { transform: translate3d(-6px, 0, 0); }
+    20%, 80% { transform: translate3d(8px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-10px, 0, 0); }
+    40%, 60% { transform: translate3d(10px, 0, 0); }
+  }
+
+  /* ═══ SCENE 1: INTRO ═══ */
+  #s1 { text-align: center; padding-top: 260px; }
+  #s1 .title {
+    font-size: 88px; font-weight: 900; letter-spacing: -2px;
+    background: linear-gradient(135deg, #ffffff 40%, #00e5ff 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 20px;
+  }
+  #s1 .kicker-pill {
+    display: inline-flex; align-items: center; gap: 12px;
+    padding: 10px 28px; border-radius: 30px;
+    background: rgba(0, 229, 255, 0.12); border: 1px solid rgba(0, 229, 255, 0.5);
+    color: #00e5ff; font-weight: 700; font-size: 24px; letter-spacing: 2px;
+    box-shadow: 0 0 35px rgba(0, 229, 255, 0.3); margin-bottom: 30px;
+  }
+  #s1 .sub { font-size: 30px; color: #94a3b8; font-weight: 400; max-width: 1200px; margin: 0 auto; line-height: 1.5; }
+
+  /* ═══ SCENE 2: BINARY CORE ═══ */
+  #s2 .chip-card {
+    position: absolute; left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    width: 480px; height: 320px; text-align: center; padding: 40px;
+    border: 2px solid #00e5ff;
+    box-shadow: 0 0 60px rgba(0, 229, 255, 0.35);
+  }
+  .stat-card {
+    position: absolute; width: 380px; padding: 25px 30px;
+    border-radius: 16px; background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(0, 229, 255, 0.3);
+  }
+  .stat-card .val { font-size: 38px; font-weight: 800; color: #00e5ff; font-family: monospace; }
+  .stat-card .lbl { font-size: 14px; text-transform: uppercase; color: #94a3b8; margin-top: 6px; letter-spacing: 1px; }
+
+  /* ═══ SCENE 3: INTENT ═══ */
+  #s3 .intent-pill {
+    position: absolute; left: 50%; top: 220px; transform: translateX(-50%);
+    padding: 20px 45px; border-radius: 40px;
+    background: rgba(15, 23, 42, 0.9); border: 2px solid #f59e0b;
+    box-shadow: 0 0 50px rgba(245, 158, 11, 0.3);
+    font-size: 32px; font-weight: 700; color: #fff;
+  }
+  #s3 .agent-box {
+    position: absolute; width: 340px; padding: 25px;
+    border-radius: 16px; background: rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(0, 229, 255, 0.3); text-align: center;
+  }
+
+  /* ═══ SCENE 4: VIRTUAL DYNO & CLUTCH INTERCEPT ═══ */
+  #s4 .dyno-dial {
+    position: absolute; left: 50%; top: 48%; transform: translate(-50%, -50%);
+    width: 540px; height: 540px;
+  }
+  #s4 .intercept-banner {
+    position: absolute; left: 50%; top: 45%; transform: translate(-50%, -50%) scale(0.9);
+    width: 980px; padding: 45px 50px; text-align: center;
+    background: rgba(26, 10, 14, 0.95);
+    border: 3px solid #ef4444; border-radius: 28px;
+    box-shadow: 0 0 100px rgba(239, 68, 68, 0.7);
+    display: none;
+  }
+  #s4 .intercept-banner.show {
+    display: block;
+    animation: alertPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  }
+  @keyframes alertPop {
+    0% { transform: translate(-50%, -50%) scale(0.6); opacity: 0; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  }
+
+  /* ═══ SCENE 5: PASS ═══ */
+  #s5 .pass-badge {
+    position: absolute; left: 50%; top: 48%; transform: translate(-50%, -50%);
+    padding: 50px 70px; border-radius: 30px; text-align: center;
+    background: rgba(10, 30, 22, 0.95); border: 3px solid #10b981;
+    box-shadow: 0 0 100px rgba(16, 185, 129, 0.6);
+  }
+
+  /* ═══ SCENE 6: 3D MAP ═══ */
+  #s6 .surface-card {
+    position: absolute; left: 50%; top: 48%; transform: translate(-50%, -50%);
+    width: 1300px; height: 650px; padding: 40px;
+  }
+
+  /* ═══ SCENE 7: GHOST CAR ═══ */
+  #s7 .drag-track {
+    position: absolute; left: 160px; top: 320px; width: 1600px; height: 380px;
+  }
+  .drag-lane {
+    position: relative; height: 160px; border-radius: 18px;
+    background: rgba(15, 23, 42, 0.65); border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 25px; overflow: hidden; padding: 20px 30px;
+  }
+  .car-icon {
+    position: absolute; left: 40px; top: 50%; transform: translateY(-50%);
+    transition: left 0.1s linear;
+  }
+
+  /* ═══ SCENE 8: HIL FLASHER ═══ */
+  #s8 .terminal-window {
+    position: absolute; left: 50%; top: 48%; transform: translate(-50%, -50%);
+    width: 1200px; height: 600px; padding: 35px;
+    font-family: monospace; font-size: 18px; line-height: 1.8;
+  }
+
+  /* ═══ SCENE 9: OUTRO ═══ */
+  #s9 { text-align: center; padding-top: 240px; }
+</style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+<!-- Top Fixed HUD -->
+<div class="hud-frame">
+  <div class="hud-header">
+    <div class="hud-logo">
+      <span style="color:#00e5ff; font-size: 26px;">⚡</span> METAECU COPILOT
+    </div>
+    <div class="hud-badge">BOSCH EDC16C39 // MOTOROLA MPC562</div>
+    <div class="hud-badge" id="hudStatus">STANDBY</div>
+  </div>
+</div>
+
+<!-- ═══ ACT 1: COLD OPEN ═══ -->
+<div class="stage active" id="s1">
+  <div class="kicker-pill">⚡ AI PROPOSES · PHYSICS DISPOSES 🛡️</div>
+  <div class="title glow-cyan">MetaECU Copilot</div>
+  <div class="sub">
+    The First Autonomous Automotive Calibration Engine with Deterministic Safety Gates.<br>
+    <span style="color: #00e5ff; font-weight: 600;">Meta Global AI Developer Hackathon 2026 // Indie Track</span>
+  </div>
+</div>
+
+<!-- ═══ ACT 2: BINARY CORE ═══ -->
+<div class="stage" id="s2">
+  <div class="glass-card chip-card">
+    <div style="font-size: 48px; margin-bottom: 15px;">🔬</div>
+    <div style="font-size: 28px; font-weight: 800; color: #fff; letter-spacing: 1px;">BOSCH EDC16C39</div>
+    <div style="font-size: 16px; color: #00e5ff; font-family: monospace; margin-top: 8px;">2 MiB RAW FLASH DECOMPILATION</div>
+    <div style="font-size: 13px; color: #94a3b8; margin-top: 15px;">Zero-DAMOS Neural Engine + Monotonic Axis Discovery</div>
+  </div>
+
+  <div class="stat-card" style="left: 180px; top: 220px;">
+    <div class="val" id="cntBytes">0</div>
+    <div class="lbl">Memory Buffer (Bytes)</div>
+  </div>
+  <div class="stat-card" style="right: 180px; top: 220px;">
+    <div class="val" id="cntMaps">0</div>
+    <div class="lbl">Defined Bosch Maps & Curves</div>
+  </div>
+  <div class="stat-card" style="left: 180px; bottom: 220px;">
+    <div class="val" style="color: #f8fafc; font-size: 28px;">MOTOROLA MPC562</div>
+    <div class="lbl">Big-Endian 32-Bit Microprocessor</div>
+  </div>
+  <div class="stat-card" style="right: 180px; bottom: 220px;">
+    <div class="val" style="color: #10b981; font-size: 32px;">0xD01FE500 ✓</div>
+    <div class="lbl">Factory Region Checksum</div>
+  </div>
+</div>
+
+<!-- ═══ ACT 3: INTENT & MULTI-AGENT ═══ -->
+<div class="stage" id="s3">
+  <div class="intent-pill">
+    <span style="color: #f59e0b;">USER INTENT:</span> "Give me 450 Nm, maximum power"
+  </div>
+
+  <div class="agent-box" style="left: 200px; top: 450px;">
+    <div style="font-size: 32px; color: #00e5ff; margin-bottom: 10px;">⚡</div>
+    <div style="font-size: 20px; font-weight: 800; color: #fff;">Meta Muse Spark 1.3</div>
+    <div style="font-size: 13px; color: #94a3b8; margin-top: 6px;">Deep Reasoning Planner</div>
+  </div>
+
+  <div class="agent-box" style="left: 50%; transform: translateX(-50%); top: 450px; border-color: #3b82f6;">
+    <div style="font-size: 32px; color: #3b82f6; margin-bottom: 10px;">📊</div>
+    <div style="font-size: 20px; font-weight: 800; color: #fff;">EngPrt_trqLim_CUR</div>
+    <div style="font-size: 13px; color: #94a3b8; margin-top: 6px;">Vectoring 450 Nm Peak Indicated</div>
+  </div>
+
+  <div class="agent-box" style="right: 200px; top: 450px; border-color: #f59e0b;">
+    <div style="font-size: 32px; color: #f59e0b; margin-bottom: 10px;">⛽</div>
+    <div style="font-size: 20px; font-weight: 800; color: #fff;">Bosch CP1H Pump</div>
+    <div style="font-size: 13px; color: #94a3b8; margin-top: 6px;">Rail Ceiling Capped: 1600 Bar</div>
+  </div>
+</div>
+
+<!-- ═══ ACT 4: VIRTUAL DYNO & CLUTCH INTERCEPT ═══ -->
+<div class="stage" id="s4">
+  <div class="dyno-dial" id="dynoDial">
+    <svg viewBox="0 0 300 300" width="100%" height="100%">
+      <!-- Dial Outer Arc -->
+      <circle cx="150" cy="150" r="120" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="20" />
+      <!-- Dial Active Arc -->
+      <circle id="dialSweep" cx="150" cy="150" r="120" fill="none" stroke="#00e5ff" stroke-width="20"
+              stroke-dasharray="754" stroke-dashoffset="754" stroke-linecap="round"
+              transform="rotate(135 150 150)" />
+      <!-- Text in center -->
+      <text x="150" y="140" text-anchor="middle" font-size="44" font-weight="900" fill="#fff" id="dynoRpmText">1000</text>
+      <text x="150" y="170" text-anchor="middle" font-size="14" font-weight="700" fill="#00e5ff" letter-spacing="2">ENGINE RPM</text>
+      <text x="150" y="200" text-anchor="middle" font-size="20" font-weight="800" fill="#f59e0b" id="dynoTorqueText">320.0 Nm</text>
+    </svg>
+  </div>
+
+  <div class="intercept-banner" id="interceptBanner">
+    <div style="font-size: 48px; margin-bottom: 10px;">🚨</div>
+    <div style="font-size: 38px; font-weight: 900; color: #ef4444; letter-spacing: 1px;" class="glow-red">
+      CRITICAL SAFETY INTERCEPT
+    </div>
+    <div style="font-size: 26px; font-weight: 800; color: #fff; margin-top: 15px;">
+      PEAK EFFECTIVE TORQUE: <span style="color: #ef4444;">438.5 Nm</span> &gt; 377.0 Nm GM F40 LIMIT!
+    </div>
+    <div style="font-size: 18px; color: #cbd5e1; margin-top: 15px; font-family: monospace; line-height: 1.6;">
+      Indicated (450.0 Nm) − Friction @ 90°C (11.5 Nm) = 438.5 Nm Effective.<br>
+      <span style="color: #f59e0b;">CLUTCH SHEAR BREAKAWAY PREVENTED — SAVING DUAL-MASS FLYWHEEL!</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ACT 5: PASS ═══ -->
+<div class="stage" id="s5">
+  <div class="pass-badge">
+    <div style="font-size: 64px; color: #10b981; margin-bottom: 15px;">✓</div>
+    <div style="font-size: 44px; font-weight: 900; color: #10b981; letter-spacing: 1px;" class="glow-green">
+      GATE PASS: 100% VERIFIED
+    </div>
+    <div style="font-size: 24px; color: #fff; margin-top: 20px; font-weight: 700;">
+      Muse Spark Autonomously Clamped Torque to <span style="color: #10b981;">369.0 Nm</span>
+    </div>
+    <div style="display: flex; gap: 30px; justify-content: center; margin-top: 35px;">
+      <div style="padding: 15px 30px; background: rgba(0,0,0,0.5); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+        <div style="font-size: 32px; font-weight: 800; color: #10b981;">185.4 HP</div>
+        <div style="font-size: 12px; color: #94a3b8; text-transform: uppercase;">Peak Power</div>
+      </div>
+      <div style="padding: 15px 30px; background: rgba(0,0,0,0.5); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+        <div style="font-size: 32px; font-weight: 800; color: #10b981;">369.0 Nm</div>
+        <div style="font-size: 12px; color: #94a3b8; text-transform: uppercase;">Clutch Safe Effective</div>
+      </div>
+      <div style="padding: 15px 30px; background: rgba(0,0,0,0.5); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+        <div style="font-size: 32px; font-weight: 800; color: #00e5ff;">1.34s</div>
+        <div style="font-size: 12px; color: #94a3b8; text-transform: uppercase;">Turbo Spool (-3.56s)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ACT 6: 3D MAP & DELTA HEATMAP ═══ -->
+<div class="stage" id="s6">
+  <div class="glass-card surface-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+      <div>
+        <div style="font-size: 28px; font-weight: 800; color: #fff;">3D Map Studio &amp; Surgical Delta Heatmap</div>
+        <div style="font-size: 14px; color: #00e5ff; font-family: monospace;">EngPrt_trqLim_CUR &amp; Rail_pSetPointBase_MAP</div>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <div class="hud-badge" style="background: rgba(0,229,255,0.2);">STOCK MAP</div>
+        <div class="hud-badge" style="background: rgba(16,185,129,0.2); color: #10b981; border-color: #10b981;">TUNED MATRIX</div>
+        <div class="hud-badge" style="background: rgba(245,158,11,0.2); color: #f59e0b; border-color: #f59e0b;">Δ DIFFERENCE</div>
+      </div>
+    </div>
+    <canvas id="meshCanvas" width="1220" height="480"></canvas>
+  </div>
+</div>
+
+<!-- ═══ ACT 7: GHOST CAR HIGHWAY DRAG ═══ -->
+<div class="stage" id="s7">
+  <div style="text-align: center; margin-top: 180px;">
+    <div style="font-size: 36px; font-weight: 900; color: #fff;">Ghost Car Highway Drag Race (60–140 km/h in 4th)</div>
+    <div style="font-size: 16px; color: #00e5ff; font-family: monospace; margin-top: 8px;">Replaying 33 Real WOT Highway Telemetry Sessions</div>
+  </div>
+
+  <div class="drag-track">
+    <!-- Lane 1: Stock Saab -->
+    <div class="drag-lane">
+      <div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 700; color: #94a3b8;">
+        <span>STOCK SAAB 9-3 1.9 TID (v9)</span>
+        <span style="color: #ef4444;">TURBO BOOST SPOOL LAG: 4.90s</span>
+      </div>
+      <div class="car-icon" id="carStock" style="font-size: 42px;">🏎️</div>
+    </div>
+
+    <!-- Lane 2: MetaECU -->
+    <div class="drag-lane" style="border-color: rgba(0, 229, 255, 0.4); box-shadow: 0 0 30px rgba(0,229,255,0.15);">
+      <div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 700; color: #00e5ff;">
+        <span>METAECU COPILOT (v10 EXTENDED SPOOL &amp; PUNCH)</span>
+        <span style="color: #10b981;">INSTANT FULL BOOST: 1.34s (-3.56s FASTER!)</span>
+      </div>
+      <div class="car-icon" id="carTuned" style="font-size: 42px;">🚀</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ACT 8: SAM 3.1 & HIL FLASHER ═══ -->
+<div class="stage" id="s8">
+  <div class="glass-card terminal-window">
+    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 20px;">
+      <div style="color: #00e5ff; font-weight: 700;">HIL DIAGNOSTIC FLASHER // KWP2000 OVER CAN 500 KBPS</div>
+      <div style="color: #10b981;">CHECKSUM: 0xD01FE500 ✓</div>
+    </div>
+    <div id="termText" style="color: #cbd5e1; height: 380px; overflow: hidden;"></div>
+    <!-- Progress bar -->
+    <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; margin-top: 20px;">
+      <div id="flashProg" style="width: 0%; height: 100%; background: linear-gradient(90deg, #00e5ff, #10b981);"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ACT 9: OUTRO ═══ -->
+<div class="stage" id="s9">
+  <div class="kicker-pill">AI PROPOSES · PHYSICS DISPOSES</div>
+  <div class="title glow-cyan">MetaECU Copilot</div>
+  <div class="sub" style="margin-bottom: 40px;">
+    The Future of Verifiable Automotive Calibration.<br>
+    Built with Meta Muse &amp; SAM 3.1 Multimodal Grounding.
+  </div>
+
+  <div style="display: flex; gap: 30px; justify-content: center; max-width: 1400px; margin: 0 auto;">
+    <div class="glass-card" style="padding: 25px 40px; border-color: rgba(0, 229, 255, 0.4); text-align: left;">
+      <div style="font-size: 13px; color: #00e5ff; font-weight: 700; text-transform: uppercase;">Live Cloud Product</div>
+      <div style="font-size: 20px; font-family: monospace; color: #fff; margin-top: 6px;">michaelgrycz--metaecu-copilot-web.us-east.modal.run</div>
+    </div>
+    <div class="glass-card" style="padding: 25px 40px; border-color: rgba(0, 229, 255, 0.4); text-align: left;">
+      <div style="font-size: 13px; color: #00e5ff; font-weight: 700; text-transform: uppercase;">Public GitHub Repository</div>
+      <div style="font-size: 20px; font-family: monospace; color: #fff; margin-top: 6px;">github.com/MichaelGrycz/MetaECU-Copilot</div>
+    </div>
+  </div>
+</div>
+
+<!-- Non-obtrusive Bottom Subtitle Bar -->
+<div id="subtitlesBar">
+  <div id="subtitlesText">MetaECU Copilot — Autonomous &amp; Verifiable Calibration Engine</div>
+</div>
+
+<script>
+  /* ═══ Starfield Background Canvas ═══ */
+  const bgCanvas = document.getElementById('bgCanvas');
+  const bgCtx = bgCanvas.getContext('2d');
+  bgCanvas.width = 1920; bgCanvas.height = 1080;
+  const stars = Array.from({ length: 120 }, () => ({
+    x: Math.random() * 1920, y: Math.random() * 1080,
+    z: Math.random() * 1000 + 200, sz: Math.random() * 2 + 1
+  }));
+
+  function drawBg() {
+    bgCtx.fillStyle = '#060a12';
+    bgCtx.fillRect(0, 0, 1920, 1080);
+    // Radial glow center
+    const grad = bgCtx.createRadialGradient(960, 540, 50, 960, 540, 900);
+    grad.addColorStop(0, '#0f1d33');
+    grad.addColorStop(1, '#060a12');
+    bgCtx.fillStyle = grad;
+    bgCtx.fillRect(0, 0, 1920, 1080);
+
+    // Drifting particles
+    bgCtx.fillStyle = 'rgba(0, 229, 255, 0.5)';
+    stars.forEach(s => {
+      s.y -= 0.4;
+      if (s.y < 0) s.y = 1080;
+      bgCtx.beginPath();
+      bgCtx.arc(s.x, s.y, s.sz, 0, Math.PI * 2);
+      bgCtx.fill();
+    });
+    requestAnimationFrame(drawBg);
+  }
+  drawBg();
+
+  /* ═══ 3D Surface Mesh Wireframe (Canvas) ═══ */
+  const mCanvas = document.getElementById('meshCanvas');
+  const mCtx = mCanvas.getContext('2d');
+  let angle = 0;
+  function drawMesh() {
+    mCtx.clearRect(0, 0, 1220, 480);
+    angle += 0.015;
+    const cols = 20, rows = 14;
+    const pts = [];
+    for (let r = 0; r < rows; r++) {
+      pts[r] = [];
+      for (let c = 0; c < cols; c++) {
+        const u = (c / cols - 0.5) * 800;
+        const v = (r / rows - 0.5) * 500;
+        const h = Math.sin(c * 0.4 + angle) * Math.cos(r * 0.4 + angle * 0.7) * 70;
+        // 3D rotation
+        const cosA = Math.cos(0.4), sinA = Math.sin(0.4);
+        const yRot = v * cosA - h * sinA;
+        const zRot = v * sinA + h * cosA + 600;
+        const fov = 750 / zRot;
+        pts[r][c] = { x: 610 + u * fov, y: 240 + yRot * fov, h };
+      }
+    }
+    // Draw grid
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        if (c + 1 < cols) {
+          mCtx.strokeStyle = pts[r][c].h > 20 ? 'rgba(245, 158, 11, 0.7)' : 'rgba(0, 229, 255, 0.4)';
+          mCtx.beginPath();
+          mCtx.moveTo(pts[r][c].x, pts[r][c].y);
+          mCtx.lineTo(pts[r][c+1].x, pts[r][c+1].y);
+          mCtx.stroke();
+        }
+        if (r + 1 < rows) {
+          mCtx.strokeStyle = 'rgba(0, 229, 255, 0.25)';
+          mCtx.beginPath();
+          mCtx.moveTo(pts[r][c].x, pts[r][c].y);
+          mCtx.lineTo(pts[r+1][c].x, pts[r+1][c].y);
+          mCtx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(drawMesh);
+  }
+  drawMesh();
+
+  /* ═══ MASTER TIMELINE CONTROLLER (0.0s to 75.0s) ═══ */
+  const timeline = [
+    { t: 0.0, stage: 's1', status: 'INIT', sub: 'Every AI tuning tool today is a chatbot guessing numbers. MetaECU Copilot is completely different.' },
+    { t: 4.0, stage: 's1', status: 'COMPLIANCE', sub: 'Pre-existing: raw binary dump & catalog. Built this week: autonomous reasoning & safety gate.' },
+    { t: 7.5, stage: 's2', status: 'INGEST', sub: 'We ingest the stock 2 MiB flash of a Bosch EDC16C39 with 774 defined Bosch maps.' },
+    { t: 14.5, stage: 's3', status: 'INTENT', sub: 'The tuner sets their goal: "Give me 450 Nm, maximum power" — an aggressive boundary test.' },
+    { t: 20.0, stage: 's3', status: 'WAR ROOM', sub: 'Meta Muse Spark 1.3 plans the calibration vector across 774 symbols in real-time.' },
+    { t: 24.0, stage: 's4', status: 'DYNO CELL', sub: 'We spin up the Virtual Dyno Cell. Engine revs climb toward 2200 RPM...' },
+    { t: 28.5, stage: 's4', status: 'INTERCEPT', sub: 'CRITICAL SAFETY INTERCEPT! Deterministic gate detects clutch shear breakaway on GM F40!' },
+    { t: 33.0, stage: 's4', status: 'PROTECTION', sub: 'Indicated 450 Nm minus friction @ 90°C exceeds the 377 Nm physical clutch clamping limit.' },
+    { t: 36.5, stage: 's5', status: 'SELF-CORRECT', sub: 'Violation report feeds back to Muse Spark. Autonomous recalculation clamps torque to 369 Nm.' },
+    { t: 41.5, stage: 's5', status: 'APPROVED', sub: 'Attempt two passes! 185.4 horsepower, 369 Nm effective torque, and zero clutch slip.' },
+    { t: 45.0, stage: 's6', status: '3D STUDIO', sub: 'In the 3D Map Studio, visual grounding inspects the exact surgical delta applied to the calibration tables.' },
+    { t: 53.0, stage: 's7', status: 'GHOST CAR', sub: 'Ghost Car Simulator: Replaying 33 real OBD-II logs — spool lag drops from 4.90s to 1.34s!' },
+    { t: 62.0, stage: 's8', status: 'HIL FLASHER', sub: 'HIL diagnostic flasher executes genuine KWP2000 protocols over CAN 500 kbps.' },
+    { t: 67.0, stage: 's8', status: 'SEALED', sub: 'The binary is sealed with a verified 32-bit Bosch checksum — 0xD01FE500 — ready for physical flashing.' },
+    { t: 70.0, stage: 's9', status: 'OUTRO', sub: 'AI that proposes. Physics that disposes. MetaECU Copilot. Try live at our Modal cloud link!' },
+  ];
+
+  let currentTime = 0;
+  let activeStageId = 's1';
+
+  function setTime(sec) {
+    currentTime = sec;
+    
+    // Find matching milestone
+    let curMilestone = timeline[0];
+    for (const m of timeline) {
+      if (sec >= m.t) curMilestone = m;
+    }
+
+    // Switch stage
+    if (curMilestone.stage !== activeStageId) {
+      document.querySelectorAll('.stage').forEach(el => el.classList.remove('active'));
+      const nextEl = document.getElementById(curMilestone.stage);
+      if (nextEl) nextEl.classList.add('active');
+      activeStageId = curMilestone.stage;
+    }
+
+    // Update status & subtitle
+    document.getElementById('hudStatus').textContent = curMilestone.status;
+    document.getElementById('subtitlesText').textContent = curMilestone.sub;
+
+    // Interactive Animations per scene
+    // Act 2: Numbers roll up
+    if (curMilestone.stage === 's2') {
+      const prog = Math.min(1, Math.max(0, (sec - 7.5) / 3.0));
+      document.getElementById('cntBytes').textContent = Math.round(prog * 2097152).toLocaleString();
+      document.getElementById('cntMaps').textContent = Math.round(prog * 774);
+    }
+
+    // Act 4: Dyno dial sweep & Intercept
+    if (curMilestone.stage === 's4') {
+      const banner = document.getElementById('interceptBanner');
+      const sweep = document.getElementById('dialSweep');
+      const rpmText = document.getElementById('dynoRpmText');
+      const trqText = document.getElementById('dynoTorqueText');
+      
+      if (sec < 28.5) {
+        banner.classList.remove('show');
+        document.body.classList.remove('shake');
+        const prog = (sec - 24.0) / 4.5;
+        const rpm = Math.round(1000 + prog * 1200);
+        const trq = (320 + prog * 118.5).toFixed(1);
+        rpmText.textContent = rpm;
+        trqText.textContent = trq + ' Nm';
+        sweep.style.strokeDashoffset = 754 - (prog * 360);
+      } else {
+        banner.classList.add('show');
+        document.body.classList.add('shake');
+        rpmText.textContent = '2200';
+        trqText.textContent = '438.5 Nm';
+        sweep.style.stroke = '#ef4444';
+        sweep.style.strokeDashoffset = 754 - 360;
+      }
+    } else {
+      document.body.classList.remove('shake');
+    }
+
+    // Act 7: Ghost Car Race
+    if (curMilestone.stage === 's7') {
+      const p = Math.min(1, Math.max(0, (sec - 53.0) / 7.0));
+      // Tuned surges ahead
+      const tunedX = 40 + p * 1400;
+      // Stock lags with boost delay
+      const stockX = 40 + Math.pow(p, 1.8) * 950;
+      document.getElementById('carTuned').style.left = tunedX + 'px';
+      document.getElementById('carStock').style.left = stockX + 'px';
+    }
+
+    // Act 8: HIL Terminal
+    if (curMilestone.stage === 's8') {
+      const p = Math.min(1, Math.max(0, (sec - 62.0) / 6.0));
+      const lines = [
+        '[CAN 500k] INITIALIZING ISO 15765-4 DIAGNOSTIC TRANSCEIVER... OK',
+        '[KWP2000] SENDING DIAGNOSTIC_SESSION_CONTROL (0x10 0x85)... ACK',
+        '[SECURITY] SEED RECEIVED: 0x4B9E218F',
+        '[META AI] COMPUTING REVERSE SECURITY KEY VIA MUSE SPARK... RESOLVED: 0x9D041FA2',
+        '[SECURITY] ACCESS_GRANTED — PROGRAMMING SESSION UNLOCKED',
+        '[FLASH] ERASING SECTOR 0x1C0000 - 0x1FE000... ERASED IN 180ms',
+        '[FLASH] STREAMING 2 MiB BURST PACKETS... 100% COMPLETE',
+        '[CHECKSUM] MPC562 BIG-ENDIAN ADDITIVE SEAL: 0xD01FE500 ✓'
+      ];
+      const showCount = Math.min(lines.length, Math.floor(p * (lines.length + 1)));
+      document.getElementById('termText').innerHTML = lines.slice(0, showCount).map(l => `<div style="color:${l.includes('✓')?'#10b981':l.includes('AI')?'#00e5ff':'#cbd5e1'}">&gt; ${l}</div>`).join('');
+      document.getElementById('flashProg').style.width = (p * 100) + '%';
+    }
+  }
+
+  // Expose setTime for deterministic recording
+  window.setTime = setTime;
+
+  // Auto-play preview if opened in browser
+  let startT = null;
+  function runLoop(ts) {
+    if (!startT) startT = ts;
+    const elapsed = (ts - startT) / 1000;
+    if (elapsed <= 75.0) {
+      setTime(elapsed);
+      requestAnimationFrame(runLoop);
+    }
+  }
+  requestAnimationFrame(runLoop);
+</script>
+
+</body>
+</html>
