@@ -5,9 +5,9 @@
 ![Python](https://img.shields.io/badge/Python-3.12-green)
 ![Safety Gate](https://img.shields.io/badge/Safety%20Gate-deterministic-red)
 
-> ### 🚀 LIVE PRODUCT (1-CLICK INTERACTIVE DEMO):
-> **[https://michaelgrycz--metaecu-copilot-web.us-east.modal.run](https://michaelgrycz--metaecu-copilot-web.us-east.modal.run)**  
-> *(Judges: Open the link and click **`▶ RUN 60s JUDGE TOUR`** in the header to observe the live autonomous calibration, acoustic engine sweep, and deterministic safety intercept in real-time!)*
+> ### 🚀 LIVE PRODUCT & OFFICIAL DEMO:
+> - **Live Interactive App (1-Click Test):** **[https://michaelgrycz--metaecu-copilot-web.us-east.modal.run](https://michaelgrycz--metaecu-copilot-web.us-east.modal.run)** *(Click "RUN 60s JUDGE TOUR" in the header!)*
+> - **Official Demo Video (YouTube):** **[https://youtu.be/abOcbkeGuiU](https://youtu.be/abOcbkeGuiU)** *(1:16 Full HD with studio voiceover & live cockpit screencast)*
 
 **AI proposes. Physics disposes.** MetaECU Copilot reads the real 2 MiB flash of a
 Bosch EDC16C39 (Saab 9-3 1.9 TiD), lets Meta Muse plan a calibration from the
@@ -102,5 +102,6 @@ regenerate all recording artifacts with `python demo_assets/generate_demo_assets
 - **Theme:** Build for Your World & Push the Frontier
 - **Author:** Michał Grycz (Solo Builder)
 - **Live Product URL:** https://michaelgrycz--metaecu-copilot-web.us-east.modal.run
+- **Demo Video (YouTube):** https://youtu.be/abOcbkeGuiU
 - **Repository:** https://github.com/MichaelGrycz/MetaECU-Copilot
 - **License:** MIT License (Open Source)
