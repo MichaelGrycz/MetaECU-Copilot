@@ -339,45 +339,93 @@
 <!-- ═══ ACT 6: 3D MAP & DELTA HEATMAP ═══ -->
 <div class="stage" id="s6">
   <div class="glass-card surface-card">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
       <div>
-        <div style="font-size: 28px; font-weight: 800; color: #fff;">3D Map Studio &amp; Surgical Delta Heatmap</div>
-        <div style="font-size: 14px; color: #00e5ff; font-family: monospace;">EngPrt_trqLim_CUR &amp; Rail_pSetPointBase_MAP</div>
+        <div style="font-size: 28px; font-weight: 800; color: #fff;">3D Calibration Map &amp; Surgical Delta Heatmap</div>
+        <div style="font-size: 14px; color: #00e5ff; font-family: monospace;">Rail_pSetPointBase_MAP (16×16: RPM × Fuel Injection Quantity ➔ Common Rail Pressure [bar])</div>
       </div>
       <div style="display: flex; gap: 10px;">
-        <div class="hud-badge" style="background: rgba(0,229,255,0.2);">STOCK MAP</div>
-        <div class="hud-badge" style="background: rgba(16,185,129,0.2); color: #10b981; border-color: #10b981;">TUNED MATRIX</div>
-        <div class="hud-badge" style="background: rgba(245,158,11,0.2); color: #f59e0b; border-color: #f59e0b;">Δ DIFFERENCE</div>
+        <div class="hud-badge" style="background: rgba(0,229,255,0.2);">1600 BAR PEAK</div>
+        <div class="hud-badge" style="background: rgba(16,185,129,0.2); color: #10b981; border-color: #10b981;">ISO 15031-6 UNITS</div>
+        <div class="hud-badge" style="background: rgba(245,158,11,0.2); color: #f59e0b; border-color: #f59e0b;">Δ SURGICAL DELTA</div>
       </div>
     </div>
-    <canvas id="meshCanvas" width="1220" height="480"></canvas>
+    <div style="position: relative; width: 100%; height: 500px; display: flex; justify-content: center; align-items: center; overflow: hidden; border-radius: 14px; background: rgba(10, 16, 26, 0.95); border: 1px solid rgba(0, 229, 255, 0.2);">
+      <img src="real_rail_surface_3d.png" style="width: 100%; height: 100%; object-fit: contain;" alt="Real Bosch 3D Rail Map" />
+    </div>
   </div>
 </div>
 
 <!-- ═══ ACT 7: GHOST CAR HIGHWAY DRAG ═══ -->
 <div class="stage" id="s7">
-  <div style="text-align: center; margin-top: 180px;">
-    <div style="font-size: 36px; font-weight: 900; color: #fff;">Ghost Car Highway Drag Race (60–140 km/h in 4th)</div>
+  <!-- Gradient definitions for exhaust boost flames -->
+  <svg width="0" height="0" style="position: absolute;">
+    <defs>
+      <linearGradient id="cyanBoost" x1="1" y1="0" x2="0" y2="0">
+        <stop offset="0%" stop-color="#ffffff"/>
+        <stop offset="30%" stop-color="#00e5ff"/>
+        <stop offset="100%" stop-color="rgba(0, 229, 255, 0)"/>
+      </linearGradient>
+      <linearGradient id="redTrail" x1="1" y1="0" x2="0" y2="0">
+        <stop offset="0%" stop-color="#ef4444"/>
+        <stop offset="100%" stop-color="rgba(239, 68, 68, 0)"/>
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <div style="text-align: center; margin-top: 170px;">
+    <div style="font-size: 38px; font-weight: 900; color: #fff;">Ghost Car Highway Drag Race (60–140 km/h in 4th Gear)</div>
     <div style="font-size: 16px; color: #00e5ff; font-family: monospace; margin-top: 8px;">Replaying 33 Real WOT Highway Telemetry Sessions</div>
   </div>
 
   <div class="drag-track">
     <!-- Lane 1: Stock Saab -->
     <div class="drag-lane">
-      <div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 700; color: #94a3b8;">
-        <span>STOCK SAAB 9-3 1.9 TID (v9)</span>
+      <div style="display: flex; justify-content: space-between; font-size: 15px; font-weight: 700; color: #94a3b8;">
+        <span>STOCK SAAB 9-3 1.9 TID (v9 CALIBRATION)</span>
         <span style="color: #ef4444;">TURBO BOOST SPOOL LAG: 4.90s</span>
       </div>
-      <div class="car-icon" id="carStock" style="font-size: 42px;">🏎️</div>
+      <div class="car-icon" id="carStock">
+        <svg viewBox="0 0 160 50" width="140" height="44" style="overflow: visible;">
+          <circle cx="36" cy="36" r="10" fill="#080d16" stroke="#94a3b8" stroke-width="2.5"/>
+          <circle cx="36" cy="36" r="4" fill="#94a3b8"/>
+          <circle cx="124" cy="36" r="10" fill="#080d16" stroke="#94a3b8" stroke-width="2.5"/>
+          <circle cx="124" cy="36" r="4" fill="#94a3b8"/>
+          <!-- Body facing RIGHT -->
+          <path d="M 6,34 L 24,34 Q 28,24 36,24 Q 44,24 48,34 L 112,34 Q 116,24 124,24 Q 132,24 136,34 L 152,34 Q 158,34 158,28 Q 156,22 144,18 L 118,10 Q 98,6 68,8 L 38,15 Q 20,18 10,25 Q 4,28 6,34 Z" fill="#64748b"/>
+          <path d="M 72,10 L 98,11 L 114,17 L 72,17 Z" fill="#050a12"/>
+          <path d="M 44,17 L 68,11 L 68,17 Z" fill="#050a12"/>
+          <!-- Taillight -->
+          <rect x="5" y="24" width="4" height="6" fill="#ef4444"/>
+          <!-- Headlight facing right -->
+          <polygon points="152,24 157,26 156,29 150,28" fill="#fef08a"/>
+        </svg>
+      </div>
     </div>
 
     <!-- Lane 2: MetaECU -->
-    <div class="drag-lane" style="border-color: rgba(0, 229, 255, 0.4); box-shadow: 0 0 30px rgba(0,229,255,0.15);">
-      <div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 700; color: #00e5ff;">
+    <div class="drag-lane" style="border-color: rgba(0, 229, 255, 0.4); box-shadow: 0 0 35px rgba(0,229,255,0.2);">
+      <div style="display: flex; justify-content: space-between; font-size: 15px; font-weight: 700; color: #00e5ff;">
         <span>METAECU COPILOT (v10 EXTENDED SPOOL &amp; PUNCH)</span>
         <span style="color: #10b981;">INSTANT FULL BOOST: 1.34s (-3.56s FASTER!)</span>
       </div>
-      <div class="car-icon" id="carTuned" style="font-size: 42px;">🚀</div>
+      <div class="car-icon" id="carTuned">
+        <svg viewBox="0 0 160 50" width="140" height="44" style="overflow: visible;">
+          <circle cx="36" cy="36" r="10" fill="#080d16" stroke="#00e5ff" stroke-width="2.5"/>
+          <circle cx="36" cy="36" r="4" fill="#00e5ff"/>
+          <circle cx="124" cy="36" r="10" fill="#080d16" stroke="#00e5ff" stroke-width="2.5"/>
+          <circle cx="124" cy="36" r="4" fill="#00e5ff"/>
+          <!-- Body facing RIGHT -->
+          <path d="M 6,34 L 24,34 Q 28,24 36,24 Q 44,24 48,34 L 112,34 Q 116,24 124,24 Q 132,24 136,34 L 152,34 Q 158,34 158,28 Q 156,22 144,18 L 118,10 Q 98,6 68,8 L 38,15 Q 20,18 10,25 Q 4,28 6,34 Z" 
+                fill="#00e5ff" filter="drop-shadow(0 0 14px rgba(0,229,255,0.8))"/>
+          <path d="M 72,10 L 98,11 L 114,17 L 72,17 Z" fill="#050a12"/>
+          <path d="M 44,17 L 68,11 L 68,17 Z" fill="#050a12"/>
+          <!-- Headlight facing right -->
+          <polygon points="152,24 157,26 156,29 150,28" fill="#ffffff" filter="drop-shadow(0 0 8px #fff)"/>
+          <!-- Horizontal Boost Flame shooting LEFT from exhaust -->
+          <polygon points="4,29 -35,26 -55,30 -35,34 4,31" fill="url(#cyanBoost)" filter="drop-shadow(0 0 12px #00e5ff)"/>
+        </svg>
+      </div>
     </div>
   </div>
 </div>
