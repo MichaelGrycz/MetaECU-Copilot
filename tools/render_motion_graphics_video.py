@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-MetaECU Copilot — Cinema Motion Graphics Video Renderer (Real-Time 47s).
+MetaECU Copilot — Cinema Motion Graphics Video Renderer (Kokoro-82M 56.5s).
 
 Drives the high-budget HTML5/CSS3/Canvas motion graphics engine (demo_assets/trailer.html)
-in Playwright Chromium 1080p, records the dynamic motion graphics (47s), and multiplexes
-it with the studio voiceover + tactile sound effects soundtrack.
+in Playwright Chromium 1080p, records the dynamic motion graphics (56.5s), and multiplexes
+it with Kokoro-82M studio voiceover + tactile sound effects soundtrack.
 """
 
 from __future__ import annotations
@@ -27,7 +27,7 @@ OUT_VIDEO = ASSETS / "MetaECU_Copilot_Demo.mp4"
 TMP_DIR = ASSETS / "_mg_tmp"
 TMP_DIR.mkdir(parents=True, exist_ok=True)
 
-TOTAL_DURATION = 47.0  # Exactly 47.0 seconds of pure adrenaline
+TOTAL_DURATION = 56.5  # Exactly 56.5 seconds of high-impact presentation
 W, H = 1920, 1080
 FPS = 30
 
@@ -62,7 +62,6 @@ def record_motion_graphics() -> Path:
         print("Triggering synchronized real-time 60fps animation...")
         page.evaluate("window.startAnimation()")
         
-        # Real-time wall-clock sync
         start_t = time.time()
         while time.time() - start_t < TOTAL_DURATION + 0.8:
             time.sleep(0.5)
@@ -82,13 +81,13 @@ def record_motion_graphics() -> Path:
 
 
 def render_cinema_video():
-    # 1. Generate Voiceover & Master Audio
-    from tools.generate_voiceover import generate_voiceover_files
-    from tools.build_trailer_master_audio import build_master_audio
+    # 1. Generate Kokoro-82M Voiceover & Master Audio
+    from tools.generate_kokoro_vo import generate_voiceover_files
+    from tools.build_kokoro_master_audio import build_kokoro_master_audio
     generate_voiceover_files()
     
     soundtrack_wav = TMP_DIR / "master_audio.wav"
-    build_master_audio(soundtrack_wav)
+    build_kokoro_master_audio(soundtrack_wav)
     
     # 2. Capture dynamic motion graphics
     raw_webm = record_motion_graphics()

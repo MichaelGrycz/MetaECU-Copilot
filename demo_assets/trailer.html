@@ -474,20 +474,20 @@
   }
   drawBg();
 
-  /* ═══ MASTER TIMELINE CONTROLLER (47s In-Medias-Res Edit) ═══ */
+  /* ═══ MASTER TIMELINE CONTROLLER (56.5s Kokoro Neural Edit) ═══ */
   var currentTime = 0;
   var activeStageId = 's1';
 
   const timeline = [
     { t: 0.0,  stage: 's1', status: 'CRITICAL INTERCEPT' },
-    { t: 4.0,  stage: 's2', status: 'TITLE PUNCH' },
-    { t: 6.5,  stage: 's3', status: 'BINARY INGEST' },
-    { t: 11.5, stage: 's4', status: 'TUNER INTENT' },
-    { t: 16.5, stage: 's5', status: 'DYNO SWEEP' },
-    { t: 23.5, stage: 's6', status: 'GATE APPROVAL' },
-    { t: 29.5, stage: 's7', status: '3D MAP STUDIO' },
-    { t: 35.0, stage: 's8', status: 'GHOST CAR DRAG' },
-    { t: 41.0, stage: 's9', status: 'FINAL PAYOFF' },
+    { t: 7.2,  stage: 's2', status: 'TITLE PUNCH' },
+    { t: 9.5,  stage: 's3', status: 'BINARY INGEST' },
+    { t: 17.5, stage: 's4', status: 'TUNER INTENT' },
+    { t: 23.5, stage: 's5', status: 'DYNO SWEEP' },
+    { t: 32.5, stage: 's6', status: 'GATE APPROVAL' },
+    { t: 40.5, stage: 's7', status: '3D MAP STUDIO' },
+    { t: 45.5, stage: 's8', status: 'GHOST CAR DRAG' },
+    { t: 51.5, stage: 's9', status: 'FINAL PAYOFF' },
   ];
 
   function applyTimeline(sec) {
@@ -514,9 +514,9 @@
       document.getElementById('mainBody').classList.remove('shake');
     }
 
-    // Act 3: Fast counters (2.0s duration)
+    // Act 3: Fast counters (2.5s duration)
     if (curMilestone.stage === 's3') {
-      const prog = Math.min(1, Math.max(0, (sec - 6.5) / 2.0));
+      const prog = Math.min(1, Math.max(0, (sec - 9.5) / 2.5));
       document.getElementById('cntBytes').textContent = Math.round(prog * 2097152).toLocaleString();
       document.getElementById('cntMaps').textContent = Math.round(prog * 774);
     }
@@ -535,9 +535,9 @@
       const rpmText = document.getElementById('dynoRpmText');
       const trqText = document.getElementById('dynoTorqueText');
       
-      if (sec < 20.0) {
+      if (sec < 27.5) {
         banner.classList.remove('show');
-        const prog = Math.min(1, Math.max(0, (sec - 16.5) / 3.5));
+        const prog = Math.min(1, Math.max(0, (sec - 23.5) / 4.0));
         const rpm = Math.round(1000 + prog * 1200);
         const trq = (320 + prog * 118.5).toFixed(1);
         rpmText.textContent = rpm;
@@ -553,16 +553,26 @@
       }
     }
 
-    // Act 7: 3D Surface subtle orbit
+    // Act 7: 3D Surface continuous rotation & push-in
     if (curMilestone.stage === 's7') {
-      const p = (sec - 29.5) / 5.5;
-      const rotY = (p - 0.5) * 8;
-      document.getElementById('surfaceCard').style.transform = `translate(-50%, -50%) rotateY(${rotY}deg) rotateX(4deg)`;
+      const p = Math.min(1, Math.max(0, (sec - 40.5) / 5.0));
+      const scale = 1.0 + p * 0.14; // smooth camera push-in
+      const rotY = (p - 0.5) * 20;  // continuous 20 deg Y-orbit
+      const rotZ = (p - 0.5) * 12;  // continuous 12 deg Z-rotation
+      const card = document.getElementById('surfaceCard');
+      if (card) {
+        card.style.transform = `translate(-50%, -50%) rotateY(${rotY}deg) rotateX(4deg) scale(${scale})`;
+      }
+      const imgEl = document.querySelector('#s7 img');
+      if (imgEl) {
+        imgEl.style.transform = `rotateZ(${rotZ}deg)`;
+        imgEl.style.transformOrigin = "center center";
+      }
     }
 
     // Act 8: Ghost Car Race with live delta
     if (curMilestone.stage === 's8') {
-      const p = Math.min(1, Math.max(0, (sec - 35.0) / 5.8));
+      const p = Math.min(1, Math.max(0, (sec - 45.5) / 5.5));
       const tunedX = 40 + p * 1400;
       const stockX = 40 + Math.pow(p, 1.8) * 850;
       document.getElementById('carTuned').style.left = tunedX + 'px';
@@ -586,7 +596,7 @@
     if (!animActive) return;
     if (!animStart) animStart = ts;
     const elapsed = (ts - animStart) / 1000;
-    if (elapsed <= 47.0) {
+    if (elapsed <= 56.5) {
       applyTimeline(elapsed);
       requestAnimationFrame(runAnimLoop);
     }
